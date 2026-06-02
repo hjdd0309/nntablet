@@ -67,23 +67,22 @@ export default function LanguageSelect() {
   // Track translation: center selectedIdx + live drag offset
   const trackY = (HALF - selectedIdx) * ITEM_HEIGHT + dragDelta
 
-  const getY = (e) => e.touches ? e.touches[0].clientY : e.clientY
-
-  const onDragStart = (e) => {
+  const onPointerDown = (e) => {
+    e.currentTarget.setPointerCapture(e.pointerId)
     setIsSnapping(false)
     setIsDragging(true)
-    dragRef.current = { active: true, startY: getY(e), lastDelta: 0, moved: false }
+    dragRef.current = { active: true, startY: e.clientY, lastDelta: 0, moved: false }
   }
 
-  const onDragMove = (e) => {
+  const onPointerMove = (e) => {
     if (!dragRef.current.active) return
-    const delta = getY(e) - dragRef.current.startY
+    const delta = e.clientY - dragRef.current.startY
     dragRef.current.lastDelta = delta
     if (Math.abs(delta) > 5) dragRef.current.moved = true
     setDragDelta(delta)
   }
 
-  const onDragEnd = () => {
+  const onPointerUp = () => {
     if (!dragRef.current.active) return
     dragRef.current.active = false
     setIsDragging(false)
@@ -114,13 +113,10 @@ export default function LanguageSelect() {
 
       <div
         style={{ ...styles.pickerOuter, cursor: isDragging ? 'grabbing' : 'grab' }}
-        onMouseDown={onDragStart}
-        onMouseMove={onDragMove}
-        onMouseUp={onDragEnd}
-        onMouseLeave={onDragEnd}
-        onTouchStart={onDragStart}
-        onTouchMove={e => { e.preventDefault(); onDragMove(e) }}
-        onTouchEnd={onDragEnd}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
       >
         {/* Center highlight */}
         <div style={styles.centerBar} />
