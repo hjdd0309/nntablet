@@ -9,7 +9,8 @@ export const workshops = [
     price: 20000,
     duration: '50-60min',
     difficulty: 'Easy',
-    x: 52, y: 38,
+    lat: 37.28472,
+    lng: 127.01638,
   },
   {
     id: 2,
@@ -21,7 +22,8 @@ export const workshops = [
     price: 30000,
     duration: '60min',
     difficulty: 'Easy',
-    x: 63, y: 55,
+    lat: 37.28350,
+    lng: 127.01748,
   },
   {
     id: 3,
@@ -33,7 +35,8 @@ export const workshops = [
     price: 25000,
     duration: '45-60min',
     difficulty: 'Medium',
-    x: 58, y: 72,
+    lat: 37.28290,
+    lng: 127.01520,
   },
 ]
 

@@ -68,7 +68,7 @@ export default function LanguageSelect() {
       <div style={{
         position: 'absolute',
         inset: 0,
-        backgroundImage: 'url(/bg-flowers.png)',
+        backgroundImage: 'url(/bg-white.png)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
@@ -103,6 +103,7 @@ export default function LanguageSelect() {
             transform: `translateY(${trackY}px)`,
             transition: isSnapping ? 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)' : 'none',
             userSelect: 'none',
+            zIndex: 2,
           }}
         >
           {LANGUAGES.map((lang, i) => {
@@ -140,7 +141,7 @@ const styles = {
   container: {
     width: '100%',
     height: '100%',
-    background: '#FAF8F2',
+    background: 'transparent',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',

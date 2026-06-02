@@ -11,7 +11,7 @@ export default function StateSelect() {
       <div style={{
         position: 'absolute',
         inset: 0,
-        backgroundImage: 'url(/bg-flowers.png)',
+        backgroundImage: 'url(/bg-white.png)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',

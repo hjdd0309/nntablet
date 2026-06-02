@@ -4,9 +4,9 @@ export default function StepProgress({ currentStep = 0 }) {
   const t = useT()
   const STEPS = [
     { labelKey: 'stepOverview', icon: '✦' },
+    { labelKey: 'stepProcessLog', icon: '❋' },
     { labelKey: 'stepChooseDesign', icon: '✿' },
     { labelKey: 'stepSketching', icon: '◉' },
-    { labelKey: 'stepProcessLog', icon: '❋' },
     { labelKey: 'stepHandcrafting', icon: '☁' },
     { labelKey: 'stepSelectPackage', icon: '❄' },
     { labelKey: 'stepCompletion', icon: '✕' },

@@ -1,83 +1,135 @@
-import { useState, useEffect } from 'react'
+import { useState, useRef } from 'react'
+import { useApp } from '../../context/AppContext'
 import { useT } from '../../i18n'
 
-const DEMO_TRANSLATION = "Please check if the message has been translated accurately...."
+const LANG_CONFIG = {
+  'English':  { api: 'en', speech: 'en-US' },
+  '한국어':   { api: 'ko', speech: 'ko-KR' },
+  'Español':  { api: 'es', speech: 'es-ES' },
+  'にほんご': { api: 'ja', speech: 'ja-JP' },
+  '汉语':     { api: 'zh', speech: 'zh-CN' },
+}
+
+async function fetchTranslation(text, from, to) {
+  const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${from}|${to}`
+  const res = await fetch(url)
+  const data = await res.json()
+  if (data.responseStatus === 200) return data.responseData.translatedText
+  throw new Error('Translation failed')
+}
 
 export default function AskForHelpModal({ onClose }) {
   const t = useT()
-  const [step, setStep] = useState('role') // role | owner-questions | guest-translating | guest-listening | guest-confirm | other-questions
-  const [typedText, setTypedText] = useState('')
+  const { language } = useApp()
+  const [step, setStep] = useState(() => language === '한국어' ? 'role' : 'guest-input')
+  const [inputText, setInputText] = useState('')
+  const [translatedText, setTranslatedText] = useState('')
   const [isListening, setIsListening] = useState(false)
+  const [isTranslating, setIsTranslating] = useState(false)
+  const [error, setError] = useState('')
+  const recRef = useRef(null)
 
-  // Typewriter effect for translation
-  useEffect(() => {
-    if (step !== 'guest-translating') return
-    setTypedText('')
-    let i = 0
-    const interval = setInterval(() => {
-      if (i <= DEMO_TRANSLATION.length) {
-        setTypedText(DEMO_TRANSLATION.slice(0, i))
-        i++
-      } else {
-        clearInterval(interval)
-      }
-    }, 45)
-    return () => clearInterval(interval)
-  }, [step])
+  const cfg = LANG_CONFIG[language] || LANG_CONFIG['English']
+  const srcCode = cfg.api
+  const tgtCode = 'ko'
+  const isKorean = srcCode === 'ko'
 
-  const handleMicClick = () => {
-    if (step === 'guest-translating') {
-      setStep('guest-listening')
-      setTimeout(() => setStep('guest-confirm'), 2500)
-    } else if (step === 'guest-listening') {
-      setStep('guest-confirm')
-    } else if (step === 'other-questions') {
-      setIsListening(!isListening)
+  const startListening = () => {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition
+    if (!SR) { setError(t.speechNotSupported); return }
+    const rec = new SR()
+    rec.lang = cfg.speech
+    rec.continuous = false
+    rec.interimResults = false
+    rec.onresult = (e) => {
+      setInputText(prev => prev + e.results[0][0].transcript)
+      setIsListening(false)
     }
+    rec.onerror = () => setIsListening(false)
+    rec.onend = () => setIsListening(false)
+    recRef.current = rec
+    rec.start()
+    setIsListening(true)
+  }
+
+  const stopListening = () => {
+    recRef.current?.stop()
+    setIsListening(false)
+  }
+
+  const handleTranslate = async () => {
+    if (!inputText.trim()) return
+    setIsTranslating(true)
+    setError('')
+    try {
+      const result = await fetchTranslation(inputText.trim(), srcCode, tgtCode)
+      setTranslatedText(result)
+      setStep('guest-result')
+    } catch {
+      setError(t.translationError)
+    } finally {
+      setIsTranslating(false)
+    }
+  }
+
+  const resetGuest = () => {
+    setInputText('')
+    setTranslatedText('')
+    setError('')
+    setIsListening(false)
+    setStep('guest-input')
+  }
+
+  const goBack = () => {
+    if (step === 'guest-result') { resetGuest(); return }
+    if (isKorean) setStep('role')
+    else onClose()
   }
 
   return (
     <div style={styles.overlay} onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div style={styles.modal}>
-        {/* Header */}
+        {/* Modal header */}
         <div style={styles.modalHeader}>
           {step !== 'role' && (
-            <button style={styles.backBtn} onClick={() => setStep('role')}>
-              ‹
-            </button>
+            <button style={styles.backBtn} onClick={goBack}>‹</button>
           )}
           <span style={styles.title}>{t.askForHelpTitle}</span>
           <button style={styles.closeBtn} onClick={onClose}>✕</button>
         </div>
 
-        {/* Role selection */}
+        {/* ── Role selection ── */}
         {step === 'role' && (
           <>
             <p style={styles.subtitle}>{t.selectRoleSubtitle}</p>
             <div style={styles.cardRow}>
               <button style={styles.roleCard} onClick={() => setStep('owner-questions')}>
                 <span style={styles.cardArrow}>→</span>
-                <span style={styles.cardLabel}>{t.imOwner.split('\n').map((line, i) => <span key={i}>{i > 0 && <br />}{line}</span>)}</span>
+                <span style={styles.cardLabel}>
+                  {t.imOwner.split('\n').map((line, i) => <span key={i}>{i > 0 && <br />}{line}</span>)}
+                </span>
               </button>
-              <button style={{...styles.roleCard, ...styles.roleCardActive}} onClick={() => setStep('guest-translating')}>
+              <button style={{ ...styles.roleCard, ...styles.roleCardActive }} onClick={() => setStep('guest-input')}>
                 <span style={styles.cardArrow}>→</span>
-                <span style={styles.cardLabel}>{t.imGuest.split('\n').map((line, i) => <span key={i}>{i > 0 && <br />}{line}</span>)}</span>
+                <span style={styles.cardLabel}>
+                  {t.imGuest.split('\n').map((line, i) => <span key={i}>{i > 0 && <br />}{line}</span>)}
+                </span>
               </button>
             </div>
             <button style={styles.otherBtn} onClick={() => setStep('other-questions')}>
               <span style={styles.micCircle}>🎤</span>
-              <span style={styles.otherLabel}>{t.otherQuestions}</span>
+              <span>{t.otherQuestions}</span>
             </button>
           </>
         )}
 
-        {/* Owner: common questions */}
+        {/* ── Owner: common questions ── */}
         {step === 'owner-questions' && (
           <>
             <p style={styles.subtitle}>{t.selectQuestionSubtitle}</p>
             <div style={styles.questionsGrid}>
               {Array.from({ length: 6 }).map((_, i) => (
-                <button key={i} style={{...styles.questionCard, ...(i === 0 ? styles.questionCardSelected : {})}}>
+                <button key={i} style={{ ...styles.questionCard, ...(i === 0 ? styles.questionCardSelected : {}) }}>
                   <div style={styles.questionFace}>😞</div>
                   <span style={styles.questionText}>{t.ownerQuestion}</span>
                 </button>
@@ -85,74 +137,85 @@ export default function AskForHelpModal({ onClose }) {
             </div>
             <button style={styles.otherBtn} onClick={() => setStep('other-questions')}>
               <span style={styles.micCircle}>🎤</span>
-              <span style={styles.otherLabel}>{t.otherQuestions}</span>
+              <span>{t.otherQuestions}</span>
             </button>
           </>
         )}
 
-        {/* Guest: translation in progress */}
-        {step === 'guest-translating' && (
+        {/* ── Guest: input (type or speak) ── */}
+        {step === 'guest-input' && (
           <>
-            <p style={styles.subtitle}>{t.checkTranslationSubtitle}</p>
-            <div style={styles.translationCard}>
-              <p style={styles.translationText}>
-                {typedText.length > 0 ? (
-                  <>
-                    {typedText.slice(0, -10)}
-                    <span style={{ color: '#ADA9A4' }}>{typedText.slice(-10)}</span>
-                  </>
-                ) : null}
-              </p>
-            </div>
-            <button style={styles.micBtn} onClick={handleMicClick}>
-              <span style={styles.micIcon}>🎤</span>
-            </button>
-          </>
-        )}
+            <p style={styles.subtitle}>{t.translateWillHelp}</p>
 
-        {/* Guest: listening */}
-        {step === 'guest-listening' && (
-          <>
-            <p style={styles.subtitle}>{t.checkTranslationSubtitle}</p>
-            <div style={styles.translationCard}>
-              <p style={{...styles.translationText, color: '#7A7570'}}>{t.listeningText}</p>
+            <div style={styles.inputWrap}>
+              <textarea
+                style={styles.textarea}
+                value={inputText}
+                onChange={(e) => setInputText(e.target.value)}
+                placeholder={t.typeHerePlaceholder}
+                rows={4}
+              />
+              {error && <p style={styles.errorText}>{error}</p>}
             </div>
-            <button style={{...styles.micBtn, ...styles.micBtnActive}}>
-              <span style={styles.micIcon}>🎤</span>
-            </button>
-          </>
-        )}
 
-        {/* Guest: confirm */}
-        {step === 'guest-confirm' && (
-          <>
-            <p style={styles.subtitle}>{t.didIGetRight}</p>
-            <div style={styles.translationCard}>
-              <p style={styles.translationText}>{DEMO_TRANSLATION}</p>
-            </div>
-            <div style={styles.confirmBtns}>
-              <button style={styles.confirmBtnNo} onClick={() => setStep('guest-translating')}>
-                <span style={styles.micSmall}>🎤</span> {t.noTryAgain}
+            <div style={styles.inputActions}>
+              <button
+                style={{ ...styles.micBtn, ...(isListening ? styles.micBtnActive : {}) }}
+                onClick={isListening ? stopListening : startListening}
+              >
+                <span style={styles.micIcon}>🎤</span>
+                <span style={styles.micLabel}>{isListening ? t.listeningText : t.tapMic}</span>
               </button>
-              <button style={styles.confirmBtnYes} onClick={onClose}>
-                <span style={styles.micSmall}>🎤</span> {t.yesThatRight}
+
+              <button
+                style={{
+                  ...styles.translateBtn,
+                  ...((!inputText.trim() || isTranslating) ? styles.translateBtnDisabled : {}),
+                }}
+                onClick={handleTranslate}
+                disabled={!inputText.trim() || isTranslating}
+              >
+                {isTranslating ? t.translatingText : t.translateBtn}
               </button>
             </div>
           </>
         )}
 
-        {/* Other questions (voice) */}
+        {/* ── Guest: translation result ── */}
+        {step === 'guest-result' && (
+          <>
+            <div style={styles.showOwnerBanner}>
+              <span style={styles.showOwnerIcon}>👇</span>
+              <span style={styles.showOwnerText}>{t.showToOwner}</span>
+            </div>
+
+            <div style={styles.resultCard}>
+              <p style={styles.resultText}>{translatedText}</p>
+            </div>
+
+            <p style={styles.originalText}>
+              <span style={styles.originalLabel}>{t.yourMessage}:</span> {inputText}
+            </p>
+
+            <div style={styles.resultBtns}>
+              <button style={styles.btnNo} onClick={resetGuest}>{t.tryAgain}</button>
+              <button style={styles.btnYes} onClick={onClose}>{t.done}</button>
+            </div>
+          </>
+        )}
+
+        {/* ── Other questions (owner-facing voice) ── */}
         {step === 'other-questions' && (
           <>
             <p style={styles.subtitle}>{t.speakClearly}</p>
             <div style={styles.translationCard}>
-              <p style={{...styles.translationText, color: '#7A7570'}}>
+              <p style={{ ...styles.translationText, color: '#7A7570' }}>
                 {isListening ? t.listeningText : t.tapMic}
               </p>
             </div>
             <button
-              style={{...styles.micBtn, ...(isListening ? styles.micBtnActive : {})}}
-              onClick={handleMicClick}
+              style={{ ...styles.micBtnLarge, ...(isListening ? styles.micBtnActive : {}) }}
+              onClick={() => setIsListening(v => !v)}
             >
               <span style={styles.micIcon}>🎤</span>
             </button>
@@ -176,7 +239,7 @@ const styles = {
   },
   modal: {
     width: 900,
-    background: 'linear-gradient(160deg, #FAF6EE 0%, #F5E8D0 40%, #EFD4A8 100%)',
+    background: 'url(/Contact_popup.png) center/cover no-repeat',
     borderRadius: 28,
     padding: '28px 36px 32px',
     display: 'flex',
@@ -247,7 +310,6 @@ const styles = {
     justifyContent: 'space-between',
     padding: '20px 24px',
     cursor: 'pointer',
-    transition: 'transform 0.15s',
   },
   roleCardActive: {
     background: 'linear-gradient(135deg, rgba(248,203,127,0.6) 0%, rgba(232,146,78,0.5) 100%)',
@@ -287,10 +349,7 @@ const styles = {
     fontFamily: 'var(--font)',
     backdropFilter: 'blur(8px)',
   },
-  micCircle: {
-    fontSize: 20,
-  },
-  otherLabel: {},
+  micCircle: { fontSize: 20 },
   questionsGrid: {
     display: 'grid',
     gridTemplateColumns: 'repeat(3, 1fr)',
@@ -308,7 +367,6 @@ const styles = {
     alignItems: 'center',
     gap: 8,
     cursor: 'pointer',
-    transition: 'background 0.2s',
     fontFamily: 'var(--font)',
   },
   questionCardSelected: {
@@ -331,6 +389,160 @@ const styles = {
     textAlign: 'center',
     lineHeight: 1.4,
   },
+
+  // Guest input
+  inputWrap: {
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 8,
+  },
+  textarea: {
+    width: '100%',
+    minHeight: 120,
+    borderRadius: 16,
+    border: '1.5px solid rgba(255,255,255,0.7)',
+    background: 'rgba(255,255,255,0.6)',
+    backdropFilter: 'blur(8px)',
+    padding: '16px 20px',
+    fontSize: 18,
+    fontFamily: 'var(--font)',
+    color: '#2A2720',
+    resize: 'none',
+    outline: 'none',
+    boxSizing: 'border-box',
+    lineHeight: 1.6,
+  },
+  errorText: {
+    fontSize: 13,
+    color: '#C0392B',
+    textAlign: 'center',
+  },
+  inputActions: {
+    display: 'flex',
+    gap: 16,
+    width: '100%',
+    alignItems: 'stretch',
+  },
+  micBtn: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    padding: '14px 16px',
+    borderRadius: 16,
+    background: 'rgba(255,255,255,0.5)',
+    border: '1.5px solid rgba(255,255,255,0.7)',
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+  },
+  micBtnActive: {
+    background: 'linear-gradient(135deg, #F8CB7F, #E8924E)',
+    boxShadow: '0 4px 20px rgba(232,146,78,0.5)',
+    border: '1.5px solid transparent',
+  },
+  micIcon: { fontSize: 26 },
+  micLabel: {
+    fontSize: 12,
+    fontWeight: 600,
+    color: '#2A2720',
+    fontFamily: 'var(--font)',
+  },
+  translateBtn: {
+    flex: 1,
+    padding: '14px 24px',
+    borderRadius: 16,
+    background: '#2A2720',
+    border: 'none',
+    fontSize: 17,
+    fontWeight: 700,
+    color: '#FAF8F2',
+    cursor: 'pointer',
+    fontFamily: 'var(--font)',
+    transition: 'opacity 0.2s',
+  },
+  translateBtnDisabled: {
+    opacity: 0.35,
+    cursor: 'not-allowed',
+  },
+
+  // Guest result
+  showOwnerBanner: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
+    background: 'rgba(42,39,32,0.08)',
+    borderRadius: 30,
+    padding: '8px 20px',
+  },
+  showOwnerIcon: { fontSize: 18 },
+  showOwnerText: {
+    fontSize: 14,
+    fontWeight: 700,
+    color: '#2A2720',
+    fontFamily: 'var(--font)',
+  },
+  resultCard: {
+    width: '100%',
+    minHeight: 140,
+    background: 'rgba(255,255,255,0.7)',
+    backdropFilter: 'blur(12px)',
+    border: '1.5px solid rgba(255,255,255,0.8)',
+    borderRadius: 20,
+    padding: '28px 32px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  resultText: {
+    fontSize: 28,
+    fontWeight: 700,
+    color: '#2A2720',
+    lineHeight: 1.5,
+    textAlign: 'center',
+    fontFamily: 'var(--font)',
+  },
+  originalText: {
+    fontSize: 13,
+    color: '#7A7570',
+    textAlign: 'center',
+    maxWidth: '100%',
+  },
+  originalLabel: {
+    fontWeight: 700,
+    color: '#5A5550',
+  },
+  resultBtns: {
+    display: 'flex',
+    gap: 16,
+    width: '100%',
+  },
+  btnNo: {
+    flex: 1,
+    padding: '16px',
+    borderRadius: 30,
+    background: 'rgba(255,255,255,0.5)',
+    border: '1px solid rgba(255,255,255,0.7)',
+    fontSize: 16,
+    fontWeight: 700,
+    color: '#2A2720',
+    cursor: 'pointer',
+    fontFamily: 'var(--font)',
+  },
+  btnYes: {
+    flex: 1,
+    padding: '16px',
+    borderRadius: 30,
+    background: '#2A2720',
+    border: 'none',
+    fontSize: 16,
+    fontWeight: 700,
+    color: '#FAF8F2',
+    cursor: 'pointer',
+    fontFamily: 'var(--font)',
+  },
   translationCard: {
     width: '100%',
     minHeight: 140,
@@ -348,7 +560,7 @@ const styles = {
     color: '#2A2720',
     lineHeight: 1.5,
   },
-  micBtn: {
+  micBtnLarge: {
     width: 72,
     height: 72,
     borderRadius: '50%',
@@ -358,55 +570,6 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     cursor: 'pointer',
-    fontSize: 26,
     transition: 'all 0.2s',
-  },
-  micBtnActive: {
-    background: 'linear-gradient(135deg, #F8CB7F, #E8924E)',
-    boxShadow: '0 4px 20px rgba(232,146,78,0.5)',
-    animation: 'pulse 1s ease-in-out infinite',
-  },
-  micIcon: {
-    fontSize: 28,
-  },
-  confirmBtns: {
-    display: 'flex',
-    gap: 16,
-    width: '100%',
-  },
-  confirmBtnNo: {
-    flex: 1,
-    padding: '16px',
-    borderRadius: 30,
-    background: 'rgba(255,255,255,0.5)',
-    border: '1px solid rgba(255,255,255,0.7)',
-    fontSize: 15,
-    fontWeight: 700,
-    color: '#2A2720',
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-    fontFamily: 'var(--font)',
-  },
-  confirmBtnYes: {
-    flex: 1,
-    padding: '16px',
-    borderRadius: 30,
-    background: 'rgba(210,205,200,0.5)',
-    border: '1px solid rgba(210,205,200,0.7)',
-    fontSize: 15,
-    fontWeight: 700,
-    color: '#2A2720',
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-    fontFamily: 'var(--font)',
-  },
-  micSmall: {
-    fontSize: 16,
   },
 }

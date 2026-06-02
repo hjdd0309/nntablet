@@ -12,10 +12,9 @@ export default function InformationPage() {
 
   return (
     <div style={styles.container}>
-      <div style={styles.bgLeft} />
-      <div style={styles.bgRight} />
+      <div style={{ position: 'absolute', inset: 0, backgroundImage: 'url(/bg-white.png)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }} />
 
-      <Header showBack backTo="/overview" />
+      <Header showBack backTo="/overview" showCall showHome />
 
       <div style={styles.content}>
         <h1 style={styles.pageTitle}>{t.information}</h1>

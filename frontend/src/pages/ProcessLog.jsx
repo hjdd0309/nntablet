@@ -2,9 +2,11 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Header from '../components/Header'
 import StepProgress from '../components/StepProgress'
+import { useT } from '../i18n'
 
 export default function ProcessLog() {
   const navigate = useNavigate()
+  const t = useT()
   const [mode, setMode] = useState(null) // null | 'timelapse' | 'photos'
   const [timelapse, setTimelapse] = useState(null) // null | 'yes' | 'no'
   const [photos, setPhotos] = useState(null) // null | 'yes' | 'no'
@@ -13,18 +15,18 @@ export default function ProcessLog() {
 
   return (
     <div style={styles.container}>
-      <div style={styles.bgGradient} />
+      <div style={{ position: 'absolute', inset: 0, backgroundImage: 'url(/bg-white.png)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }} />
       <Header
         showBack
         backTo="/sketch"
-        showCall={showCamera}
+        showCall
         showVideo={mode === 'timelapse'}
         showCamera={mode === 'photos'}
-        showHome={showCamera}
+        showHome
       />
-      <StepProgress currentStep={3} />
+      <StepProgress currentStep={1} />
 
-      <h1 style={styles.title}>Log your craft</h1>
+      <h1 style={styles.title}>{t.logYourCraft}</h1>
 
       {/* Mode selection */}
       {mode === null && (
@@ -32,11 +34,11 @@ export default function ProcessLog() {
           <div style={styles.cardRow}>
             <button style={styles.card} onClick={() => setMode('timelapse')}>
               <span style={styles.arrow}>→</span>
-              <span style={styles.cardLabel}>Time-lapse</span>
+              <span style={styles.cardLabel}>{t.timelapse}</span>
             </button>
             <button style={styles.card} onClick={() => setMode('photos')}>
               <span style={styles.arrow}>→</span>
-              <span style={styles.cardLabel}>Photo Alerts</span>
+              <span style={styles.cardLabel}>{t.photoAlerts}</span>
             </button>
           </div>
         </div>
@@ -50,13 +52,13 @@ export default function ProcessLog() {
             <div style={styles.promptCard}>
               {timelapse === null && (
                 <>
-                  <h2 style={styles.promptTitle}>Save your process?</h2>
-                  <p style={styles.promptSub}>Create a time-lapse</p>
+                  <h2 style={styles.promptTitle}>{t.saveYourProcess}</h2>
+                  <p style={styles.promptSub}>{t.createTimelapse}</p>
                   <button style={styles.btnNo} onClick={() => { setTimelapse('no'); navigate('/overview') }}>
-                    No, thanks
+                    {t.noThanks}
                   </button>
                   <button style={styles.btnYes} onClick={() => { setTimelapse('yes'); navigate('/video') }}>
-                    Yes, please
+                    {t.yesPlease}
                   </button>
                 </>
               )}
@@ -72,19 +74,19 @@ export default function ProcessLog() {
             <div style={{...styles.cameraView, ...styles.checkered, position: 'relative'}}>
               <div style={styles.photoTooltip}>
                 <span style={styles.photoIcon}>📷</span>
-                <p style={styles.photoTooltipText}>Take a photo!</p>
+                <p style={styles.photoTooltipText}>{t.takeAPhoto}</p>
               </div>
             </div>
             <div style={styles.promptCard}>
               {photos === null && (
                 <>
-                  <h2 style={styles.promptTitle}>Take progress photos</h2>
-                  <p style={styles.promptSub}>Get a photo reminder every 10 minutes</p>
+                  <h2 style={styles.promptTitle}>{t.takeProgressPhotos}</h2>
+                  <p style={styles.promptSub}>{t.photoReminderSub}</p>
                   <button style={styles.btnNo} onClick={() => { setPhotos('no'); navigate('/overview') }}>
-                    No, thanks
+                    {t.noThanks}
                   </button>
                   <button style={styles.btnYes} onClick={() => { setPhotos('yes'); navigate('/overview') }}>
-                    Yes, please
+                    {t.yesPlease}
                   </button>
                 </>
               )}

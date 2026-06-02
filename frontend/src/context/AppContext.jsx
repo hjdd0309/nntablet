@@ -8,6 +8,7 @@ export function AppProvider({ children }) {
   const [selectedDesign, setSelectedDesign] = useState(null)
   const [sketchColor, setSketchColor] = useState(null)
   const [currentStep, setCurrentStep] = useState(0)
+  const [showHelpModal, setShowHelpModal] = useState(false)
 
   return (
     <AppContext.Provider value={{
@@ -16,6 +17,7 @@ export function AppProvider({ children }) {
       selectedDesign, setSelectedDesign,
       sketchColor, setSketchColor,
       currentStep, setCurrentStep,
+      showHelpModal, setShowHelpModal,
     }}>
       {children}
     </AppContext.Provider>

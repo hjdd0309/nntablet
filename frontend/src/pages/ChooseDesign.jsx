@@ -16,9 +16,9 @@ export default function ChooseDesign() {
 
   return (
     <div style={styles.container}>
-      <div style={styles.bgBlobs} />
+      <div style={{ position: 'absolute', inset: 0, backgroundImage: 'url(/bg-blue.png)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }} />
       <Header showBack backTo="/overview" showCall showCamera showHome />
-      <StepProgress currentStep={1} />
+      <StepProgress currentStep={2} />
 
       <div style={styles.content}>
         <h1 style={styles.title}>{t.chooseYourDesign}</h1>

@@ -13,7 +13,7 @@ const LANG_MAP = {
 
 export default function Header({ showBack = true, showHome = false, showCall = false, showCamera = false, showVideo = false, backTo }) {
   const navigate = useNavigate()
-  const { language } = useApp()
+  const { language, setShowHelpModal } = useApp()
   const t = useT()
   const [time, setTime] = useState('')
 
@@ -45,7 +45,7 @@ export default function Header({ showBack = true, showHome = false, showCall = f
           </button>
         )}
         {showCall && (
-          <button style={styles.callBtn}>
+          <button style={styles.callBtn} onClick={() => setShowHelpModal(true)}>
             <span style={{ marginRight: 4 }}>🤚</span> {t.call}
           </button>
         )}

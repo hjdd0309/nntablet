@@ -38,8 +38,8 @@ export default function Gallery() {
 
   return (
     <div style={styles.container}>
-      <div style={styles.bgGradient} />
-      <Header showBack backTo="/overview" />
+      <div style={{ position: 'absolute', inset: 0, backgroundImage: 'url(/bg-white.png)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }} />
+      <Header showBack backTo="/overview" showCall showHome />
 
       <div style={styles.pageHeader}>
         <h1 style={styles.title}>{t.galleryTitle}</h1>

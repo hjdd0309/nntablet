@@ -1,19 +1,25 @@
-import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Header from '../components/Header'
 import StepProgress from '../components/StepProgress'
-import AskForHelpModal from '../components/modals/AskForHelpModal'
+import { useApp } from '../context/AppContext'
 import { useT } from '../i18n'
 
 export default function WorkshopOverview() {
   const navigate = useNavigate()
   const t = useT()
-  const [showHelp, setShowHelp] = useState(false)
+  const { setShowHelpModal } = useApp()
 
   return (
     <div style={styles.container}>
-      <div style={styles.bgGradient} />
-      <Header showBack backTo="/state" />
+      <div style={{
+        position: 'absolute',
+        inset: 0,
+        backgroundImage: 'url(/bg-white.png)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+      }} />
+      <Header showBack backTo="/state" showCall showHome />
       <StepProgress currentStep={0} />
 
       <div style={styles.content}>
@@ -53,7 +59,7 @@ export default function WorkshopOverview() {
             </button>
 
             {/* Ask for Help */}
-            <button style={styles.card} onClick={() => setShowHelp(true)}>
+            <button style={styles.card} onClick={() => setShowHelpModal(true)}>
               <span style={styles.cardArrow}>→</span>
               <div style={styles.cardMeta}>
                 <span style={styles.cardMetaIcon}>🤚</span>
@@ -63,7 +69,7 @@ export default function WorkshopOverview() {
             </button>
 
             {/* Ready to Enjoy */}
-            <button style={{...styles.card, ...styles.cardHighlight}} onClick={() => navigate('/choose-design')}>
+            <button style={{...styles.card, ...styles.cardHighlight}} onClick={() => navigate('/process-log')}>
               <span style={styles.cardArrow}>→</span>
               <div style={styles.cardMeta}>
                 <span style={styles.cardMetaIcon}>🎊</span>
@@ -75,7 +81,6 @@ export default function WorkshopOverview() {
         </div>
       </div>
 
-      {showHelp && <AskForHelpModal onClose={() => setShowHelp(false)} />}
     </div>
   )
 }
