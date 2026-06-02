@@ -13,7 +13,7 @@ export default defineConfig({
         description: '나녕 공방 체험 키오스크',
         theme_color: '#2A2720',
         background_color: '#FAF8F2',
-        display: 'standalone',
+        display: 'fullscreen',
         orientation: 'landscape',
         start_url: '/',
         scope: '/',

@@ -8,44 +8,6 @@ const ITEM_HEIGHT = 64
 const VISIBLE = 5
 const HALF = Math.floor(VISIBLE / 2)
 
-function DecoShapes() {
-  return (
-    <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }} viewBox="0 0 1210 770" preserveAspectRatio="xMidYMid slice">
-      <ellipse cx="140" cy="160" rx="80" ry="110" fill="#D4D0C8" opacity="0.7" transform="rotate(-15, 140, 160)" />
-      <ellipse cx="100" cy="220" rx="55" ry="80" fill="#D4D0C8" opacity="0.6" transform="rotate(20, 100, 220)" />
-      <ellipse cx="180" cy="210" rx="55" ry="80" fill="#D4D0C8" opacity="0.6" transform="rotate(-20, 180, 210)" />
-      <ellipse cx="1060" cy="130" rx="60" ry="100" fill="#E8947A" opacity="0.55" transform="rotate(-30, 1060, 130)" />
-      <ellipse cx="1110" cy="170" rx="60" ry="100" fill="#E8947A" opacity="0.55" transform="rotate(60, 1110, 170)" />
-      <ellipse cx="1140" cy="100" rx="60" ry="100" fill="#E8947A" opacity="0.55" transform="rotate(30, 1140, 100)" />
-      <ellipse cx="1090" cy="80" rx="60" ry="100" fill="#E8947A" opacity="0.55" transform="rotate(-60, 1090, 80)" />
-      <polygon points="70,420 85,470 140,470 96,500 112,550 70,520 28,550 44,500 0,470 55,470" fill="#F5C842" opacity="0.8" transform="translate(0, -20)" />
-      <path d="M 280 680 Q 280 620 340 620 Q 400 620 400 680 Q 370 700 340 700 Q 310 700 280 680 Z" fill="#F0EEE8" opacity="0.75" />
-      <line x1="340" y1="620" x2="310" y2="700" stroke="#D8D4CC" strokeWidth="1.5" opacity="0.5" />
-      <line x1="340" y1="620" x2="325" y2="702" stroke="#D8D4CC" strokeWidth="1.5" opacity="0.5" />
-      <line x1="340" y1="620" x2="340" y2="702" stroke="#D8D4CC" strokeWidth="1.5" opacity="0.5" />
-      <line x1="340" y1="620" x2="355" y2="702" stroke="#D8D4CC" strokeWidth="1.5" opacity="0.5" />
-      <line x1="340" y1="620" x2="370" y2="700" stroke="#D8D4CC" strokeWidth="1.5" opacity="0.5" />
-      <circle cx="1050" cy="640" r="55" fill="#A8C0CC" opacity="0.45" />
-      <circle cx="1050" cy="570" r="40" fill="#A8C0CC" opacity="0.4" />
-      <circle cx="1115" cy="605" r="40" fill="#A8C0CC" opacity="0.4" />
-      <circle cx="985" cy="605" r="40" fill="#A8C0CC" opacity="0.4" />
-      <circle cx="1050" cy="710" r="40" fill="#A8C0CC" opacity="0.4" />
-      <circle cx="420" cy="430" r="45" fill="#E8A0B0" opacity="0.5" />
-      <circle cx="420" cy="365" r="36" fill="#E8A0B0" opacity="0.45" />
-      <circle cx="474" cy="397" r="36" fill="#E8A0B0" opacity="0.45" />
-      <circle cx="453" cy="463" r="36" fill="#E8A0B0" opacity="0.45" />
-      <circle cx="387" cy="463" r="36" fill="#E8A0B0" opacity="0.45" />
-      <circle cx="366" cy="397" r="36" fill="#E8A0B0" opacity="0.45" />
-      <circle cx="870" cy="500" r="40" fill="#C0B4E8" opacity="0.45" />
-      <circle cx="870" cy="438" r="32" fill="#C0B4E8" opacity="0.4" />
-      <circle cx="918" cy="466" r="32" fill="#C0B4E8" opacity="0.4" />
-      <circle cx="900" cy="524" r="32" fill="#C0B4E8" opacity="0.4" />
-      <circle cx="840" cy="524" r="32" fill="#C0B4E8" opacity="0.4" />
-      <circle cx="822" cy="466" r="32" fill="#C0B4E8" opacity="0.4" />
-      <ellipse cx="820" cy="140" rx="35" ry="50" fill="#ECC0B0" opacity="0.55" transform="rotate(-15, 820, 140)" />
-    </svg>
-  )
-}
 
 export default function LanguageSelect() {
   const navigate = useNavigate()
@@ -103,7 +65,14 @@ export default function LanguageSelect() {
 
   return (
     <div style={styles.container}>
-      <DecoShapes />
+      <div style={{
+        position: 'absolute',
+        inset: 0,
+        backgroundImage: 'url(/bg-flowers.png)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+      }} />
 
       <button style={styles.backBtn} onClick={() => navigate('/')}>
         ‹ {t.back}
