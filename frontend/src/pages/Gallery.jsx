@@ -1,32 +1,57 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Header from '../components/Header'
-import { galleryItems } from '../data/gallery'
+import { supabase } from '../lib/supabase'
 import { useT } from '../i18n'
 
 export default function Gallery() {
   const navigate = useNavigate()
   const t = useT()
-  const [items, setItems] = useState(galleryItems)
+  const [items, setItems] = useState([])
+  const [loading, setLoading] = useState(true)
   const [showMySaved, setShowMySaved] = useState(false)
   const [showFilter, setShowFilter] = useState(false)
-  const [filterMode, setFilterMode] = useState('most-liked') // 'most-liked' | 'most-saved'
+  const [filterMode, setFilterMode] = useState('most-liked')
   const [selectedItem, setSelectedItem] = useState(null)
 
-  const toggleLike = (id) => {
-    setItems(prev => prev.map(item =>
-      item.id === id
-        ? { ...item, liked: !item.liked, likes: item.liked ? item.likes - 1 : item.likes + 1 }
-        : item
-    ))
+  useEffect(() => {
+    fetchGallery()
+  }, [])
+
+  async function fetchGallery() {
+    setLoading(true)
+    const { data, error } = await supabase
+      .from('gallery')
+      .select('*')
+      .order('created_at', { ascending: false })
+    if (!error && data) {
+      setItems(data.map(item => ({ ...item, liked: false, saved: false })))
+    }
+    setLoading(false)
   }
 
-  const toggleSave = (id) => {
-    setItems(prev => prev.map(item =>
-      item.id === id
-        ? { ...item, saved: !item.saved, saves: item.saved ? item.saves - 1 : item.saves + 1 }
-        : item
+  const toggleLike = async (id) => {
+    const item = items.find(i => i.id === id)
+    const delta = item.liked ? -1 : 1
+    setItems(prev => prev.map(i =>
+      i.id === id ? { ...i, liked: !i.liked, likes: i.likes + delta } : i
     ))
+    if (selectedItem?.id === id) {
+      setSelectedItem(prev => ({ ...prev, liked: !prev.liked, likes: prev.likes + delta }))
+    }
+    await supabase.from('gallery').update({ likes: item.likes + delta }).eq('id', id)
+  }
+
+  const toggleSave = async (id) => {
+    const item = items.find(i => i.id === id)
+    const delta = item.saved ? -1 : 1
+    setItems(prev => prev.map(i =>
+      i.id === id ? { ...i, saved: !i.saved, saves: i.saves + delta } : i
+    ))
+    if (selectedItem?.id === id) {
+      setSelectedItem(prev => ({ ...prev, saved: !prev.saved, saves: prev.saves + delta }))
+    }
+    await supabase.from('gallery').update({ saves: item.saves + delta }).eq('id', id)
   }
 
   const fmtNum = (n) => n >= 1000 ? (n / 1000).toFixed(1).replace('.0', '') + 'k' : n
@@ -39,7 +64,7 @@ export default function Gallery() {
   return (
     <div style={styles.container}>
       <div style={{ position: 'absolute', inset: 0, backgroundImage: 'url(/bg-white.png)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }} />
-      <Header showBack backTo="/overview" showCall showHome />
+      <Header showBack showCall showHome />
 
       <div style={styles.pageHeader}>
         <h1 style={styles.title}>{t.galleryTitle}</h1>
@@ -75,31 +100,36 @@ export default function Gallery() {
       </div>
 
       <div style={styles.grid} onClick={() => setShowFilter(false)}>
-        {displayed.map((item) => (
+        {loading ? (
+          <div style={styles.loadingWrap}>
+            <span style={styles.loadingText}>불러오는 중...</span>
+          </div>
+        ) : displayed.length === 0 ? (
+          <div style={styles.loadingWrap}>
+            <span style={styles.loadingText}>등록된 작품이 없습니다.</span>
+          </div>
+        ) : displayed.map((item) => (
           <div key={item.id} style={styles.card}>
-            <div style={{...styles.cardImg, background: item.color}}>
+            <div style={styles.cardImg}>
+              {item.image_url ? (
+                <img src={item.image_url} alt={item.username} style={styles.cardImgEl} />
+              ) : (
+                <div style={{...styles.cardImgEl, background: '#E8D5C8'}} />
+              )}
               <button style={styles.expandBtn} onClick={() => setSelectedItem(item)}>
                 <span style={styles.expandIcon}>↗</span>
                 <span style={styles.expandIconSmall}>↙</span>
               </button>
             </div>
             <div style={styles.cardFooter}>
-              <button
-                style={styles.statBtn}
-                onClick={() => toggleLike(item.id)}
-              >
+              <button style={styles.statBtn} onClick={() => toggleLike(item.id)}>
                 <span style={{ color: item.liked ? '#F5C842' : 'transparent', textShadow: item.liked ? 'none' : '0 0 0 #2A2720', fontSize: 16 }}>
                   {item.liked ? '💛' : '🤍'}
                 </span>
                 <span style={styles.statNum}>{fmtNum(item.likes)}</span>
               </button>
-              <button
-                style={styles.statBtn}
-                onClick={() => toggleSave(item.id)}
-              >
-                <span style={{ fontSize: 15 }}>
-                  {item.saved ? '🔖' : '🔖'}
-                </span>
+              <button style={styles.statBtn} onClick={() => toggleSave(item.id)}>
+                <span style={{ fontSize: 15 }}>🔖</span>
                 <span style={{...styles.statNum, color: item.saved ? '#F5C842' : '#7A7570'}}>{fmtNum(item.saves)}</span>
               </button>
               <span style={styles.username}>@{item.username}</span>
@@ -108,12 +138,17 @@ export default function Gallery() {
         ))}
       </div>
 
-      {/* Detail modal */}
       {selectedItem && (
         <div style={styles.overlay} onClick={() => setSelectedItem(null)}>
           <div style={styles.detailModal} onClick={(e) => e.stopPropagation()}>
             <button style={styles.modalCloseBtn} onClick={() => setSelectedItem(null)}>✕</button>
-            <div style={{...styles.detailImg, background: selectedItem.color}} />
+            <div style={styles.detailImg}>
+              {selectedItem.image_url ? (
+                <img src={selectedItem.image_url} alt={selectedItem.username} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : (
+                <div style={{ width: '100%', height: '100%', background: '#E8D5C8' }} />
+              )}
+            </div>
             <div style={styles.detailFooter}>
               <button style={styles.statBtn} onClick={() => toggleLike(selectedItem.id)}>
                 <span style={{ fontSize: 18 }}>{selectedItem.liked ? '💛' : '🤍'}</span>
@@ -141,15 +176,6 @@ const styles = {
     flexDirection: 'column',
     position: 'relative',
     overflow: 'hidden',
-  },
-  bgGradient: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: '50%',
-    background: 'linear-gradient(180deg, rgba(248,203,127,0.3) 0%, transparent 100%)',
-    pointerEvents: 'none',
   },
   pageHeader: {
     display: 'flex',
@@ -224,6 +250,18 @@ const styles = {
     zIndex: 2,
     alignContent: 'start',
   },
+  loadingWrap: {
+    gridColumn: '1 / -1',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 60,
+  },
+  loadingText: {
+    fontSize: 16,
+    color: '#7A7570',
+    fontFamily: 'var(--font)',
+  },
   card: {
     background: '#fff',
     borderRadius: 16,
@@ -233,6 +271,13 @@ const styles = {
   cardImg: {
     height: 180,
     position: 'relative',
+    overflow: 'hidden',
+  },
+  cardImgEl: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
+    display: 'block',
   },
   expandBtn: {
     position: 'absolute',
@@ -251,14 +296,8 @@ const styles = {
     flexDirection: 'column',
     gap: 0,
   },
-  expandIcon: {
-    fontSize: 11,
-    lineHeight: 1,
-  },
-  expandIconSmall: {
-    fontSize: 11,
-    lineHeight: 1,
-  },
+  expandIcon: { fontSize: 11, lineHeight: 1 },
+  expandIconSmall: { fontSize: 11, lineHeight: 1 },
   cardFooter: {
     padding: '10px 14px',
     display: 'flex',
@@ -324,6 +363,7 @@ const styles = {
   detailImg: {
     height: 440,
     width: '100%',
+    overflow: 'hidden',
   },
   detailFooter: {
     padding: '16px 24px',

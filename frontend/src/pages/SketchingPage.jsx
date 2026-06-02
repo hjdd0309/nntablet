@@ -64,13 +64,34 @@ function drawShape(ctx, design, w, h) {
   ctx.strokeStyle = '#2A2720'
   ctx.lineWidth = 3
   ctx.lineJoin = 'round'
+  ctx.lineCap = 'round'
+
   if (design === 'gat') {
+    const bx  = w * 0.3   // body left
+    const bx2 = w * 0.7   // body right
+    const by  = h * 0.05  // body top
+    const cx  = w * 0.5   // brim center x
+    const cy  = h * 0.72  // brim center y
+    const rx  = w * 0.44  // brim x-radius
+    const ry  = h * 0.16  // brim y-radius
+
+    // Y where the hat body sides meet the top arc of the brim ellipse
+    const normDx2 = ((bx - cx) / rx) ** 2
+    const intersectY = cy - ry * Math.sqrt(1 - normDx2)
+
+    // Angles where the hat body sides meet the top of the brim
+    const θRight = Math.atan2((intersectY - cy) / ry, (bx2 - cx) / rx)
+    const θLeft  = Math.atan2((intersectY - cy) / ry, (bx  - cx) / rx)
+
+    // Draw everything as ONE continuous path so crown and brim connect cleanly
     ctx.beginPath()
-    ctx.rect(w * 0.3, h * 0.05, w * 0.4, h * 0.6)
+    ctx.moveTo(bx, by)           // top-left of crown
+    ctx.lineTo(bx2, by)          // top edge →
+    ctx.lineTo(bx2, intersectY)  // right side ↓ down to brim junction
+    ctx.ellipse(cx, cy, rx, ry, 0, θRight, θLeft, false) // brim arc (clockwise, through bottom)
+    ctx.lineTo(bx, by)           // left side ↑ back to top-left
     ctx.stroke()
-    ctx.beginPath()
-    ctx.ellipse(w * 0.5, h * 0.72, w * 0.44, h * 0.16, 0, 0, Math.PI * 2)
-    ctx.stroke()
+
   } else {
     ctx.beginPath()
     ctx.rect(w * 0.15, h * 0.1, w * 0.7, h * 0.8)
@@ -263,7 +284,7 @@ export default function SketchingPage() {
             </div>
             <div style={styles.modalBtns}>
               <button style={styles.btnNo} onClick={() => setShowConfirm(false)}>{t.noTryAgainSketch}</button>
-              <button style={styles.btnYes} onClick={() => navigate('/process-log')}>{t.yesImReady}</button>
+              <button style={styles.btnYes} onClick={() => navigate('/crafting')}>{t.yesImReady}</button>
             </div>
           </div>
         </div>

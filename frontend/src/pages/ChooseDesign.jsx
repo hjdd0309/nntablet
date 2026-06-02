@@ -17,7 +17,7 @@ export default function ChooseDesign() {
   return (
     <div style={styles.container}>
       <div style={{ position: 'absolute', inset: 0, backgroundImage: 'url(/bg-blue.png)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }} />
-      <Header showBack backTo="/overview" showCall showCamera showHome />
+      <Header showBack backTo="/process-log" showCall showCamera showHome />
       <StepProgress currentStep={2} />
 
       <div style={styles.content}>

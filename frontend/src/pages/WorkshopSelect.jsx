@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { workshops } from '../data/workshops'
 import { useT } from '../i18n'
+import Header from '../components/Header'
 
 const MAP_CENTER = { lat: 37.28400, lng: 127.01630 }
 const MAP_LEVEL = 4
@@ -11,77 +12,55 @@ function KakaoMap({ onWorkshopClick, activeId }) {
   const containerRef = useRef(null)
   const mapRef = useRef(null)
   const markersRef = useRef([])
+  const [mapError, setMapError] = useState(null)
 
   useEffect(() => {
-    const key = import.meta.env.VITE_KAKAO_MAP_KEY
-
     const initMap = () => {
       if (!containerRef.current) return
+      try {
+        const { kakao } = window
+        const center = new kakao.maps.LatLng(MAP_CENTER.lat, MAP_CENTER.lng)
+        const map = new kakao.maps.Map(containerRef.current, { center, level: MAP_LEVEL })
+        mapRef.current = map
 
-      const { kakao } = window
-      const center = new kakao.maps.LatLng(MAP_CENTER.lat, MAP_CENTER.lng)
-      const map = new kakao.maps.Map(containerRef.current, {
-        center,
-        level: MAP_LEVEL,
-      })
-      mapRef.current = map
-
-      workshops.forEach((w) => {
-        const position = new kakao.maps.LatLng(w.lat, w.lng)
-
-        // Custom overlay marker
-        const content = document.createElement('div')
-        content.innerHTML = `
-          <div style="
-            display:flex;flex-direction:column;align-items:center;
-            cursor:pointer;user-select:none;
-          ">
-            <div style="
-              background:#2A2720;color:#FAF8F2;
-              padding:5px 10px;border-radius:20px;
-              font-size:12px;font-weight:700;
-              white-space:nowrap;
-              box-shadow:0 2px 8px rgba(0,0,0,0.25);
-              font-family:sans-serif;
-            ">${w.name}</div>
-            <div style="
-              width:0;height:0;
-              border-left:6px solid transparent;
-              border-right:6px solid transparent;
-              border-top:7px solid #2A2720;
-              margin-top:-1px;
-            "></div>
-          </div>
-        `
-        content.addEventListener('click', () => onWorkshopClick(w))
-
-        const overlay = new kakao.maps.CustomOverlay({
-          position,
-          content,
-          yAnchor: 1,
+        workshops.forEach((w) => {
+          const position = new kakao.maps.LatLng(w.lat, w.lng)
+          const content = document.createElement('div')
+          content.innerHTML = `
+            <div style="display:flex;flex-direction:column;align-items:center;cursor:pointer;user-select:none;">
+              <div style="background:#2A2720;color:#FAF8F2;padding:5px 10px;border-radius:20px;font-size:12px;font-weight:700;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.25);font-family:sans-serif;">${w.name}</div>
+              <div style="width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:7px solid #2A2720;margin-top:-1px;"></div>
+            </div>
+          `
+          content.addEventListener('click', () => onWorkshopClick(w))
+          const overlay = new kakao.maps.CustomOverlay({ position, content, yAnchor: 1 })
+          overlay.setMap(map)
+          markersRef.current.push({ id: w.id, overlay, position })
         })
-        overlay.setMap(map)
-        markersRef.current.push({ id: w.id, overlay, position })
-      })
+      } catch (e) {
+        setMapError(e.message)
+      }
     }
 
     if (window.kakao?.maps) {
       window.kakao.maps.load(initMap)
-      return
+    } else {
+      setMapError('카카오 지도 SDK를 불러오지 못했습니다.\n카카오 개발자 콘솔 > 플랫폼 > Web에\nhttp://localhost:5173 등록 여부를 확인해주세요.')
     }
-
-    const script = document.createElement('script')
-    script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${key}&autoload=false`
-    script.onload = () => window.kakao.maps.load(initMap)
-    document.head.appendChild(script)
   }, [])
 
-  // Pan to active workshop
   useEffect(() => {
     if (!mapRef.current || !activeId) return
     const found = markersRef.current.find((m) => m.id === activeId)
     if (found) mapRef.current.panTo(found.position)
   }, [activeId])
+
+  if (mapError) return (
+    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 12, background: '#F0EDE5', padding: 24 }}>
+      <span style={{ fontSize: 32 }}>🗺️</span>
+      <p style={{ fontSize: 13, color: '#7A7570', textAlign: 'center', fontFamily: 'var(--font)', lineHeight: 1.6 }}>{mapError}</p>
+    </div>
+  )
 
   return <div ref={containerRef} style={{ width: '100%', height: '100%' }} />
 }
@@ -105,6 +84,8 @@ export default function WorkshopSelect() {
 
   return (
     <div style={styles.container}>
+      <Header showBack showCall showHome />
+      <div style={styles.mapRow}>
       {/* Left panel */}
       <div style={styles.listPanel}>
         <h2 style={styles.listTitle}>{t.selectWorkshop}</h2>
@@ -155,6 +136,7 @@ export default function WorkshopSelect() {
           )
         })()}
       </div>
+      </div>
     </div>
   )
 }
@@ -164,7 +146,13 @@ const styles = {
     width: '100%',
     height: '100%',
     display: 'flex',
+    flexDirection: 'column',
     background: '#FAF8F2',
+  },
+  mapRow: {
+    flex: 1,
+    display: 'flex',
+    overflow: 'hidden',
   },
   listPanel: {
     width: 430,
@@ -201,7 +189,7 @@ const styles = {
     fontFamily: 'var(--font)',
   },
   workshopCardActive: {
-    borderColor: '#2A2720',
+    border: '2px solid #2A2720',
     boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
   },
   workshopImg: {

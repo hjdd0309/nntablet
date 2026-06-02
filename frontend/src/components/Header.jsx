@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { useT } from '../i18n'
+import logo from '../assets/로고.png'
 
 const LANG_MAP = {
   English: 'ENG',
@@ -11,7 +12,7 @@ const LANG_MAP = {
   '汉语': '中文',
 }
 
-export default function Header({ showBack = true, showHome = false, showCall = false, showCamera = false, showVideo = false, backTo }) {
+export default function Header({ showBack = true, showHome = false, showCall = false, showCamera = false, showVideo = false, backTo, onBack }) {
   const navigate = useNavigate()
   const { language, setShowHelpModal } = useApp()
   const t = useT()
@@ -32,6 +33,7 @@ export default function Header({ showBack = true, showHome = false, showCall = f
   }, [])
 
   const handleBack = () => {
+    if (onBack) { onBack(); return }
     if (backTo) navigate(backTo)
     else navigate(-1)
   }
@@ -52,7 +54,7 @@ export default function Header({ showBack = true, showHome = false, showCall = f
       </div>
 
       <div style={styles.center}>
-        <span style={styles.logo}>나녕</span>
+        <img src={logo} alt="나녕" style={styles.logo} />
       </div>
 
       <div style={styles.right}>
@@ -102,10 +104,8 @@ const styles = {
     justifyContent: 'flex-end',
   },
   logo: {
-    fontFamily: "'Nanum Brush Script', cursive",
-    fontSize: 28,
-    color: '#2A2720',
-    letterSpacing: 1,
+    height: 36,
+    objectFit: 'contain',
   },
   backBtn: {
     display: 'flex',

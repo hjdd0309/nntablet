@@ -39,7 +39,7 @@ export default function WorkshopOverview() {
           {/* Right column */}
           <div style={styles.rightCol}>
             {/* What is Chilbo */}
-            <button style={styles.card} onClick={() => navigate('/info')}>
+            <button style={styles.card} onClick={() => navigate('/video')}>
               <span style={styles.cardArrow}>→</span>
               <div style={styles.cardMeta}>
                 <span style={styles.cardMetaIcon}>❓</span>

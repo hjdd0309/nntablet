@@ -42,7 +42,7 @@ export default function VideoPlayer() {
 
   return (
     <div style={styles.container}>
-      <Header showBack backTo="/process-log" showCall showHome />
+      <Header showBack showCall showHome />
 
       {/* Video area */}
       <div style={styles.videoArea} onClick={() => setIsPlaying(v => !v)}>

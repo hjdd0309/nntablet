@@ -18,7 +18,8 @@ export default function ProcessLog() {
       <div style={{ position: 'absolute', inset: 0, backgroundImage: 'url(/bg-white.png)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }} />
       <Header
         showBack
-        backTo="/sketch"
+        onBack={mode !== null ? () => setMode(null) : undefined}
+        backTo={mode === null ? '/overview' : undefined}
         showCall
         showVideo={mode === 'timelapse'}
         showCamera={mode === 'photos'}
@@ -34,11 +35,17 @@ export default function ProcessLog() {
           <div style={styles.cardRow}>
             <button style={styles.card} onClick={() => setMode('timelapse')}>
               <span style={styles.arrow}>→</span>
-              <span style={styles.cardLabel}>{t.timelapse}</span>
+              <div style={styles.cardBottom}>
+                <span style={styles.cardDesc}>{t.timelapseDesc}</span>
+                <span style={styles.cardLabel}>{t.timelapse}</span>
+              </div>
             </button>
             <button style={styles.card} onClick={() => setMode('photos')}>
               <span style={styles.arrow}>→</span>
-              <span style={styles.cardLabel}>{t.photoAlerts}</span>
+              <div style={styles.cardBottom}>
+                <span style={styles.cardDesc}>{t.photoAlertsDesc}</span>
+                <span style={styles.cardLabel}>{t.photoAlerts}</span>
+              </div>
             </button>
           </div>
         </div>
@@ -50,18 +57,19 @@ export default function ProcessLog() {
           <div style={styles.splitLayout}>
             <div style={{...styles.cameraView, ...styles.checkered}} />
             <div style={styles.promptCard}>
-              {timelapse === null && (
-                <>
-                  <h2 style={styles.promptTitle}>{t.saveYourProcess}</h2>
-                  <p style={styles.promptSub}>{t.createTimelapse}</p>
-                  <button style={styles.btnNo} onClick={() => { setTimelapse('no'); navigate('/overview') }}>
-                    {t.noThanks}
-                  </button>
-                  <button style={styles.btnYes} onClick={() => { setTimelapse('yes'); navigate('/video') }}>
-                    {t.yesPlease}
-                  </button>
-                </>
-              )}
+              <h2 style={styles.promptTitle}>{t.saveYourProcess}</h2>
+              <p style={styles.promptSub}>{t.createTimelapse}</p>
+              <div style={styles.btnGroup}>
+                <button style={styles.btnNo} onClick={() => navigate('/choose-design')}>
+                  {t.noThanks}
+                </button>
+                <button style={styles.btnNo} onClick={() => navigate('/choose-design')}>
+                  {t.recordAutomatic}
+                </button>
+                <button style={styles.btnNo} onClick={() => navigate('/choose-design')}>
+                  {t.recordWithAlert}
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -78,18 +86,19 @@ export default function ProcessLog() {
               </div>
             </div>
             <div style={styles.promptCard}>
-              {photos === null && (
-                <>
-                  <h2 style={styles.promptTitle}>{t.takeProgressPhotos}</h2>
-                  <p style={styles.promptSub}>{t.photoReminderSub}</p>
-                  <button style={styles.btnNo} onClick={() => { setPhotos('no'); navigate('/overview') }}>
-                    {t.noThanks}
-                  </button>
-                  <button style={styles.btnYes} onClick={() => { setPhotos('yes'); navigate('/overview') }}>
-                    {t.yesPlease}
-                  </button>
-                </>
-              )}
+              <h2 style={styles.promptTitle}>{t.takeProgressPhotos}</h2>
+              <p style={styles.promptSub}>{t.photoReminderSub}</p>
+              <div style={styles.btnGroup}>
+                <button style={styles.btnNo} onClick={() => navigate('/choose-design')}>
+                  {t.noThanks}
+                </button>
+                <button style={styles.btnNo} onClick={() => navigate('/choose-design')}>
+                  {t.recordAutomatic}
+                </button>
+                <button style={styles.btnNo} onClick={() => navigate('/choose-design')}>
+                  {t.recordWithAlert}
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -170,13 +179,25 @@ const styles = {
     justifyContent: 'center',
     fontSize: 18,
   },
+  cardBottom: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 6,
+    marginTop: 'auto',
+  },
+  cardDesc: {
+    fontSize: 13,
+    fontWeight: 400,
+    color: '#7A7570',
+    textAlign: 'left',
+    lineHeight: 1.5,
+  },
   cardLabel: {
     fontSize: 28,
     fontWeight: 700,
     color: '#2A2720',
     textAlign: 'left',
     lineHeight: 1.3,
-    marginTop: 'auto',
     paddingBottom: 8,
   },
   splitLayout: {
@@ -202,11 +223,11 @@ const styles = {
     flex: 1,
     background: 'rgba(255,255,255,0.6)',
     borderRadius: 20,
-    padding: '28px 24px',
+    padding: '20px 20px',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    gap: 16,
+    gap: 10,
     boxShadow: '0 2px 16px rgba(0,0,0,0.06)',
   },
   promptTitle: {
@@ -220,31 +241,27 @@ const styles = {
     fontSize: 13,
     color: '#7A7570',
     textAlign: 'center',
-    marginBottom: 8,
+  },
+  btnGroup: {
+    width: '100%',
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-evenly',
   },
   btnNo: {
     width: '100%',
-    padding: '16px',
+    padding: '12px 16px',
     borderRadius: 30,
     background: 'rgba(250,248,242,0.8)',
     border: '1px solid rgba(0,0,0,0.06)',
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 700,
     color: '#2A2720',
     cursor: 'pointer',
     fontFamily: 'var(--font)',
-  },
-  btnYes: {
-    width: '100%',
-    padding: '16px',
-    borderRadius: 30,
-    background: 'rgba(210,205,200,0.7)',
-    border: 'none',
-    fontSize: 16,
-    fontWeight: 700,
-    color: '#2A2720',
-    cursor: 'pointer',
-    fontFamily: 'var(--font)',
+    textAlign: 'center',
+    lineHeight: 1.4,
   },
   photoTooltip: {
     position: 'absolute',

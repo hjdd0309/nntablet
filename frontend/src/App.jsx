@@ -10,6 +10,9 @@ import InformationPage from './pages/InformationPage'
 import ChooseDesign from './pages/ChooseDesign'
 import SketchingPage from './pages/SketchingPage'
 import ProcessLog from './pages/ProcessLog'
+import CraftingPage from './pages/CraftingPage'
+import PackagePage from './pages/PackagePage'
+import CompletionPage from './pages/CompletionPage'
 import Gallery from './pages/Gallery'
 import VideoPlayer from './pages/VideoPlayer'
 import './App.css'
@@ -28,6 +31,9 @@ function AppRoutes() {
         <Route path="/choose-design" element={<ChooseDesign />} />
         <Route path="/sketch" element={<SketchingPage />} />
         <Route path="/process-log" element={<ProcessLog />} />
+        <Route path="/crafting" element={<CraftingPage />} />
+        <Route path="/package" element={<PackagePage />} />
+        <Route path="/completion" element={<CompletionPage />} />
         <Route path="/gallery" element={<Gallery />} />
         <Route path="/video" element={<VideoPlayer />} />
       </Routes>
