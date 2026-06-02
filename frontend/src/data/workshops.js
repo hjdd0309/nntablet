@@ -1,0 +1,48 @@
+export const workshops = [
+  {
+    id: 1,
+    name: '나녕공방',
+    nameEn: 'Nanyeong Workshop',
+    type: '공방',
+    typeEn: 'Workshop',
+    experience: 'Chilbo (칠보공예)',
+    price: 20000,
+    duration: '50-60min',
+    difficulty: 'Easy',
+    x: 52, y: 38,
+  },
+  {
+    id: 2,
+    name: '장금이 공방',
+    nameEn: 'Janggeum Workshop',
+    type: '한복 대여',
+    typeEn: 'Hanbok Rental',
+    experience: 'Hanbok Experience',
+    price: 30000,
+    duration: '60min',
+    difficulty: 'Easy',
+    x: 63, y: 55,
+  },
+  {
+    id: 3,
+    name: '하늘여',
+    nameEn: 'Haneulye',
+    type: '공방',
+    typeEn: 'Workshop',
+    experience: 'Traditional Craft',
+    price: 25000,
+    duration: '45-60min',
+    difficulty: 'Medium',
+    x: 58, y: 72,
+  },
+]
+
+export const chilboSteps = [
+  { id: 1, label: 'Choose\ndesign', labelKo: '디자인\n선택' },
+  { id: 2, label: 'Choose\nglaze color', labelKo: '유약 색상\n선택' },
+  { id: 3, label: 'Mix\nthe glaze', labelKo: '유약\n혼합' },
+  { id: 4, label: 'Apply\nthe glaze', labelKo: '유약\n도포' },
+  { id: 5, label: 'Fire\nin a kiln', labelKo: '가마에서\n소성' },
+  { id: 6, label: 'Cool\nfor 30s', labelKo: '30초\n냉각' },
+  { id: 7, label: 'Smooth\nthe surface', labelKo: '표면\n다듬기' },
+]
