@@ -1,17 +1,25 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Header from '../components/Header'
 import StepProgress from '../components/StepProgress'
+import ShareArtworkModal from '../components/modals/ShareArtworkModal'
+import { useApp } from '../context/AppContext'
 import { useT } from '../i18n'
-
-const CARDS = [
-  { key: 'exploreNearby',   icon: '📍', route: '/workshops' },
-  { key: 'shareMyArtwork',  icon: '🎨', route: '/gallery'   },
-  { key: 'processHistory',  icon: '🎬', route: '/video'     },
-]
+import { supabase } from '../lib/supabase'
 
 export default function CompletionPage() {
   const navigate = useNavigate()
+  const { sessionToken, resetSession } = useApp()
+  const [showShare, setShowShare] = useState(false)
   const t = useT()
+
+  const handleExit = async () => {
+    if (sessionToken) {
+      supabase.from('craft_sessions').delete().eq('session_token', sessionToken).then(() => {})
+    }
+    resetSession()
+    navigate('/language')
+  }
 
   return (
     <div style={styles.container}>
@@ -23,17 +31,40 @@ export default function CompletionPage() {
         <h1 style={styles.title}>{t.artworkComplete}</h1>
 
         <div style={styles.cardRow}>
-          {CARDS.map(({ key, icon, route }) => (
-            <button key={key} style={styles.card} onClick={() => navigate(route)}>
-              <span style={styles.arrow}>→</span>
-              <div style={styles.cardBottom}>
-                <span style={styles.cardIcon}>{icon}</span>
-                <span style={styles.cardLabel}>{t[key]}</span>
-              </div>
-            </button>
-          ))}
+          {/* 주변 탐색 */}
+          <button style={styles.card} onClick={() => navigate('/workshops', { state: { explore: true } })}>
+            <span style={styles.arrow}>→</span>
+            <div style={styles.cardBottom}>
+              <span style={styles.cardIcon}>📍</span>
+              <span style={styles.cardLabel}>{t.exploreNearby}</span>
+            </div>
+          </button>
+
+          {/* 작품 공유 */}
+          <button style={styles.card} onClick={() => setShowShare(true)}>
+            <span style={styles.arrow}>→</span>
+            <div style={styles.cardBottom}>
+              <span style={styles.cardIcon}>🎨</span>
+              <span style={styles.cardLabel}>{t.shareMyArtwork}</span>
+            </div>
+          </button>
+
+          {/* 제작 과정 보기 */}
+          <button style={styles.card} onClick={() => navigate('/process-result')}>
+            <span style={styles.arrow}>→</span>
+            <div style={styles.cardBottom}>
+              <span style={styles.cardIcon}>🎬</span>
+              <span style={styles.cardLabel}>{t.processHistory}</span>
+            </div>
+          </button>
         </div>
+
+        <button style={styles.exitBtn} onClick={handleExit}>
+          {t.exitSession}
+        </button>
       </div>
+
+      {showShare && <ShareArtworkModal onClose={() => setShowShare(false)} />}
     </div>
   )
 }
@@ -54,8 +85,8 @@ const styles = {
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: '0 60px 24px',
-    gap: 32,
+    padding: '0 40px 24px',
+    gap: 28,
     zIndex: 2,
     overflow: 'hidden',
   },
@@ -69,7 +100,7 @@ const styles = {
   },
   cardRow: {
     display: 'flex',
-    gap: 24,
+    gap: 20,
     width: '100%',
     maxWidth: 900,
   },
@@ -84,36 +115,48 @@ const styles = {
     flexDirection: 'column',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
-    padding: '24px 28px',
+    padding: '20px 24px',
     cursor: 'pointer',
     fontFamily: 'var(--font)',
     backgroundImage: 'linear-gradient(160deg, rgba(255,255,255,0.5) 0%, rgba(248,203,127,0.15) 100%)',
   },
   arrow: {
     alignSelf: 'flex-end',
-    width: 40,
-    height: 40,
+    width: 36,
+    height: 36,
     borderRadius: '50%',
     border: '1.5px solid #2A2720',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    fontSize: 18,
+    fontSize: 16,
   },
   cardBottom: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 8,
+    gap: 6,
   },
   cardIcon: {
-    fontSize: 28,
+    fontSize: 26,
   },
   cardLabel: {
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: 700,
     color: '#2A2720',
     textAlign: 'left',
     lineHeight: 1.3,
-    paddingBottom: 4,
+  },
+  exitBtn: {
+    padding: '26px 96px',
+    borderRadius: 30,
+    background: 'rgba(42,39,32,0.08)',
+    border: '1px solid rgba(42,39,32,0.15)',
+    fontSize: 20,
+    fontWeight: 700,
+    color: '#7A7570',
+    cursor: 'pointer',
+    fontFamily: 'var(--font)',
+    flexShrink: 0,
+    marginTop: 32,
   },
 }

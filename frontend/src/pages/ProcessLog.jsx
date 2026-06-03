@@ -2,16 +2,39 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Header from '../components/Header'
 import StepProgress from '../components/StepProgress'
+import { useApp } from '../context/AppContext'
 import { useT } from '../i18n'
+import { supabase } from '../lib/supabase'
+
+const generateToken = () => Math.random().toString(36).substring(2, 10)
 
 export default function ProcessLog() {
   const navigate = useNavigate()
+  const { setSessionToken, startRecording, recordMode, nextShotCountdown } = useApp()
+
+  const fmtCountdown = (s) => {
+    if (s === null) return ''
+    return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`
+  }
   const t = useT()
   const [mode, setMode] = useState(null) // null | 'timelapse' | 'photos'
-  const [timelapse, setTimelapse] = useState(null) // null | 'yes' | 'no'
-  const [photos, setPhotos] = useState(null) // null | 'yes' | 'no'
 
-  const showCamera = mode !== null
+  const handleRecord = async (recMode) => {
+    // 타이머·토큰은 DB와 무관하게 즉시 시작
+    const token = generateToken()
+    setSessionToken(token)
+    startRecording(recMode)
+    navigate('/choose-design')
+
+    // DB 저장은 백그라운드에서 시도
+    supabase.from('craft_sessions').insert({
+      session_token: token,
+      mode: mode,
+      media_urls: [],
+    }).then(({ error }) => {
+      if (error) console.error('세션 생성 실패:', error.message)
+    })
+  }
 
   return (
     <div style={styles.container}>
@@ -21,15 +44,12 @@ export default function ProcessLog() {
         onBack={mode !== null ? () => setMode(null) : undefined}
         backTo={mode === null ? '/overview' : undefined}
         showCall
-        showVideo={mode === 'timelapse'}
-        showCamera={mode === 'photos'}
         showHome
       />
       <StepProgress currentStep={1} />
-
       <h1 style={styles.title}>{t.logYourCraft}</h1>
 
-      {/* Mode selection */}
+      {/* 모드 선택 */}
       {mode === null && (
         <div style={styles.content}>
           <div style={styles.cardRow}>
@@ -51,51 +71,46 @@ export default function ProcessLog() {
         </div>
       )}
 
-      {/* Timelapse flow */}
-      {mode === 'timelapse' && (
+      {/* 촬영 방식 선택 */}
+      {mode !== null && (
         <div style={styles.content}>
           <div style={styles.splitLayout}>
-            <div style={{...styles.cameraView, ...styles.checkered}} />
-            <div style={styles.promptCard}>
-              <h2 style={styles.promptTitle}>{t.saveYourProcess}</h2>
-              <p style={styles.promptSub}>{t.createTimelapse}</p>
-              <div style={styles.btnGroup}>
-                <button style={styles.btnNo} onClick={() => navigate('/choose-design')}>
-                  {t.noThanks}
-                </button>
-                <button style={styles.btnNo} onClick={() => navigate('/choose-design')}>
-                  {t.recordAutomatic}
-                </button>
-                <button style={styles.btnNo} onClick={() => navigate('/choose-design')}>
-                  {t.recordWithAlert}
-                </button>
-              </div>
+            {/* 왼쪽: 빈 공간 (촬영 중이면 타이머 표시) */}
+            <div style={styles.placeholder}>
+              {recordMode && nextShotCountdown !== null ? (
+                <div style={styles.timerInner}>
+                  <span style={styles.timerCamIcon}>📷</span>
+                  <span style={styles.timerLabel}>다음 촬영까지</span>
+                  <span style={styles.timerCountdown}>{fmtCountdown(nextShotCountdown)}</span>
+                </div>
+              ) : null}
             </div>
-          </div>
-        </div>
-      )}
 
-      {/* Photo alerts flow */}
-      {mode === 'photos' && (
-        <div style={styles.content}>
-          <div style={styles.splitLayout}>
-            <div style={{...styles.cameraView, ...styles.checkered, position: 'relative'}}>
-              <div style={styles.photoTooltip}>
-                <span style={styles.photoIcon}>📷</span>
-                <p style={styles.photoTooltipText}>{t.takeAPhoto}</p>
-              </div>
-            </div>
+            {/* 오른쪽: 3버튼 */}
             <div style={styles.promptCard}>
-              <h2 style={styles.promptTitle}>{t.takeProgressPhotos}</h2>
-              <p style={styles.promptSub}>{t.photoReminderSub}</p>
+              <h2 style={styles.promptTitle}>
+                {mode === 'timelapse' ? t.saveYourProcess : t.takeProgressPhotos}
+              </h2>
+              <p style={styles.promptSub}>
+                {mode === 'timelapse' ? t.createTimelapse : t.photoReminderSub}
+              </p>
               <div style={styles.btnGroup}>
-                <button style={styles.btnNo} onClick={() => navigate('/choose-design')}>
+                <button
+                  style={styles.btnNo}
+                  onClick={() => navigate('/choose-design')}
+                >
                   {t.noThanks}
                 </button>
-                <button style={styles.btnNo} onClick={() => navigate('/choose-design')}>
+                <button
+                  style={styles.btnNo}
+                  onClick={() => handleRecord('auto')}
+                >
                   {t.recordAutomatic}
                 </button>
-                <button style={styles.btnNo} onClick={() => navigate('/choose-design')}>
+                <button
+                  style={styles.btnNo}
+                  onClick={() => handleRecord('alert')}
+                >
                   {t.recordWithAlert}
                 </button>
               </div>
@@ -116,16 +131,6 @@ const styles = {
     flexDirection: 'column',
     position: 'relative',
     overflow: 'hidden',
-  },
-  bgGradient: {
-    position: 'absolute',
-    top: 0,
-    left: '50%',
-    transform: 'translateX(-50%)',
-    width: '100%',
-    height: '50%',
-    background: 'radial-gradient(ellipse at top center, rgba(210,205,195,0.5) 0%, transparent 70%)',
-    pointerEvents: 'none',
   },
   title: {
     fontSize: 26,
@@ -187,7 +192,6 @@ const styles = {
   },
   cardDesc: {
     fontSize: 13,
-    fontWeight: 400,
     color: '#7A7570',
     textAlign: 'left',
     lineHeight: 1.5,
@@ -202,52 +206,69 @@ const styles = {
   },
   splitLayout: {
     display: 'flex',
-    gap: 24,
+    gap: 20,
     width: '100%',
     maxWidth: 1000,
     height: 380,
   },
-  cameraView: {
+  placeholder: {
     flex: 1.5,
     borderRadius: 16,
-    overflow: 'hidden',
-    position: 'relative',
+    background: 'rgba(255,255,255,0.25)',
+    border: '1.5px dashed rgba(42,39,32,0.12)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  checkered: {
-    backgroundImage: 'linear-gradient(45deg, #d4d0c8 25%, transparent 25%), linear-gradient(-45deg, #d4d0c8 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #d4d0c8 75%), linear-gradient(-45deg, transparent 75%, #d4d0c8 75%)',
-    backgroundSize: '24px 24px',
-    backgroundPosition: '0 0, 0 12px, 12px -12px, -12px 0px',
-    backgroundColor: '#e8e4dc',
+  timerInner: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  timerCamIcon: {
+    fontSize: 28,
+  },
+  timerCountdown: {
+    fontSize: 20,
+    fontWeight: 700,
+    color: '#2A2720',
+    fontFamily: 'var(--font)',
+  },
+  timerLabel: {
+    fontSize: 14,
+    color: '#7A7570',
+    fontFamily: 'var(--font)',
   },
   promptCard: {
     flex: 1,
     background: 'rgba(255,255,255,0.6)',
+    backdropFilter: 'blur(8px)',
     borderRadius: 20,
-    padding: '20px 20px',
+    padding: '20px',
     display: 'flex',
     flexDirection: 'column',
-    alignItems: 'center',
     gap: 10,
     boxShadow: '0 2px 16px rgba(0,0,0,0.06)',
+    border: '1px solid rgba(255,255,255,0.8)',
   },
   promptTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 700,
     color: '#2A2720',
-    textAlign: 'center',
     fontFamily: 'var(--font)',
   },
   promptSub: {
     fontSize: 13,
     color: '#7A7570',
-    textAlign: 'center',
+    fontFamily: 'var(--font)',
+    lineHeight: 1.5,
   },
   btnGroup: {
-    width: '100%',
-    flex: 1,
+    marginTop: 'auto',
     display: 'flex',
     flexDirection: 'column',
-    justifyContent: 'space-evenly',
+    gap: 8,
   },
   btnNo: {
     width: '100%',
@@ -255,34 +276,12 @@ const styles = {
     borderRadius: 30,
     background: 'rgba(250,248,242,0.8)',
     border: '1px solid rgba(0,0,0,0.06)',
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: 700,
     color: '#2A2720',
     cursor: 'pointer',
     fontFamily: 'var(--font)',
     textAlign: 'center',
     lineHeight: 1.4,
-  },
-  photoTooltip: {
-    position: 'absolute',
-    top: '50%',
-    left: '40%',
-    transform: 'translate(-50%, -50%)',
-    background: 'rgba(250,248,242,0.9)',
-    borderRadius: 16,
-    padding: '20px 24px',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: 12,
-    boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
-  },
-  photoIcon: {
-    fontSize: 32,
-  },
-  photoTooltipText: {
-    fontSize: 14,
-    fontWeight: 600,
-    color: '#2A2720',
   },
 }

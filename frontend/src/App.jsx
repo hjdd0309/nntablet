@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { AppProvider, useApp } from './context/AppContext'
 import AskForHelpModal from './components/modals/AskForHelpModal'
 import SplashScreen from './pages/SplashScreen'
@@ -15,29 +15,38 @@ import PackagePage from './pages/PackagePage'
 import CompletionPage from './pages/CompletionPage'
 import Gallery from './pages/Gallery'
 import VideoPlayer from './pages/VideoPlayer'
+import SessionView from './pages/SessionView'
+import ProcessResultPage from './pages/ProcessResultPage'
+import PhotoPromptOverlay from './components/PhotoPromptOverlay'
 import './App.css'
 
 function AppRoutes() {
+  const location = useLocation()
   const { showHelpModal, setShowHelpModal } = useApp()
   return (
     <div className="app-container">
-      <Routes>
-        <Route path="/" element={<SplashScreen />} />
-        <Route path="/language" element={<LanguageSelect />} />
-        <Route path="/state" element={<StateSelect />} />
-        <Route path="/workshops" element={<WorkshopSelect />} />
-        <Route path="/overview" element={<WorkshopOverview />} />
-        <Route path="/info" element={<InformationPage />} />
-        <Route path="/choose-design" element={<ChooseDesign />} />
-        <Route path="/sketch" element={<SketchingPage />} />
-        <Route path="/process-log" element={<ProcessLog />} />
-        <Route path="/crafting" element={<CraftingPage />} />
-        <Route path="/package" element={<PackagePage />} />
-        <Route path="/completion" element={<CompletionPage />} />
-        <Route path="/gallery" element={<Gallery />} />
-        <Route path="/video" element={<VideoPlayer />} />
-      </Routes>
+      <div key={location.pathname} className="page-enter">
+        <Routes location={location}>
+          <Route path="/" element={<SplashScreen />} />
+          <Route path="/language" element={<LanguageSelect />} />
+          <Route path="/state" element={<StateSelect />} />
+          <Route path="/workshops" element={<WorkshopSelect />} />
+          <Route path="/overview" element={<WorkshopOverview />} />
+          <Route path="/info" element={<InformationPage />} />
+          <Route path="/choose-design" element={<ChooseDesign />} />
+          <Route path="/sketch" element={<SketchingPage />} />
+          <Route path="/process-log" element={<ProcessLog />} />
+          <Route path="/crafting" element={<CraftingPage />} />
+          <Route path="/package" element={<PackagePage />} />
+          <Route path="/completion" element={<CompletionPage />} />
+          <Route path="/gallery" element={<Gallery />} />
+          <Route path="/video" element={<VideoPlayer />} />
+          <Route path="/view/:token" element={<SessionView />} />
+          <Route path="/process-result" element={<ProcessResultPage />} />
+        </Routes>
+      </div>
       {showHelpModal && <AskForHelpModal onClose={() => setShowHelpModal(false)} />}
+      <PhotoPromptOverlay />
     </div>
   )
 }

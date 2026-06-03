@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useApp } from '../../context/AppContext'
 import { useT } from '../../i18n'
 
@@ -10,12 +10,14 @@ const LANG_CONFIG = {
   '汉语':     { api: 'zh', speech: 'zh-CN' },
 }
 
-async function fetchTranslation(text, from, to) {
-  const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${from}|${to}`
+async function fetchTranslation(text) {
+  const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=ko&dt=t&q=${encodeURIComponent(text)}`
   const res = await fetch(url)
+  if (!res.ok) throw new Error('Translation failed')
   const data = await res.json()
-  if (data.responseStatus === 200) return data.responseData.translatedText
-  throw new Error('Translation failed')
+  const translated = data?.[0]?.map(chunk => chunk?.[0]).filter(Boolean).join('')
+  if (!translated) throw new Error('Translation failed')
+  return translated
 }
 
 export default function AskForHelpModal({ onClose }) {
@@ -27,7 +29,48 @@ export default function AskForHelpModal({ onClose }) {
   const [isListening, setIsListening] = useState(false)
   const [isTranslating, setIsTranslating] = useState(false)
   const [error, setError] = useState('')
+  const [bars, setBars] = useState(Array(24).fill(0))
   const recRef = useRef(null)
+  const audioCtxRef = useRef(null)
+  const analyserRef = useRef(null)
+  const streamRef = useRef(null)
+  const animFrameRef = useRef(null)
+
+  useEffect(() => {
+    return () => {
+      cancelAnimationFrame(animFrameRef.current)
+      streamRef.current?.getTracks().forEach(t => t.stop())
+      audioCtxRef.current?.close()
+    }
+  }, [])
+
+  const startVisualization = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      streamRef.current = stream
+      const ctx = new AudioContext()
+      audioCtxRef.current = ctx
+      const analyser = ctx.createAnalyser()
+      analyser.fftSize = 64
+      analyserRef.current = analyser
+      ctx.createMediaStreamSource(stream).connect(analyser)
+      const data = new Uint8Array(analyser.frequencyBinCount)
+      const tick = () => {
+        analyser.getByteFrequencyData(data)
+        setBars(Array.from(data).slice(0, 24).map(v => v / 255))
+        animFrameRef.current = requestAnimationFrame(tick)
+      }
+      tick()
+    } catch {}
+  }
+
+  const stopVisualization = () => {
+    cancelAnimationFrame(animFrameRef.current)
+    streamRef.current?.getTracks().forEach(t => t.stop())
+    audioCtxRef.current?.close()
+    audioCtxRef.current = null
+    setBars(Array(24).fill(0))
+  }
 
   const cfg = LANG_CONFIG[language] || LANG_CONFIG['English']
   const srcCode = cfg.api
@@ -44,17 +87,20 @@ export default function AskForHelpModal({ onClose }) {
     rec.onresult = (e) => {
       setInputText(prev => prev + e.results[0][0].transcript)
       setIsListening(false)
+      stopVisualization()
     }
-    rec.onerror = () => setIsListening(false)
-    rec.onend = () => setIsListening(false)
+    rec.onerror = () => { setIsListening(false); stopVisualization() }
+    rec.onend = () => { setIsListening(false); stopVisualization() }
     recRef.current = rec
     rec.start()
     setIsListening(true)
+    startVisualization()
   }
 
   const stopListening = () => {
     recRef.current?.stop()
     setIsListening(false)
+    stopVisualization()
   }
 
   const handleTranslate = async () => {
@@ -62,7 +108,7 @@ export default function AskForHelpModal({ onClose }) {
     setIsTranslating(true)
     setError('')
     try {
-      const result = await fetchTranslation(inputText.trim(), srcCode, tgtCode)
+      const result = await fetchTranslation(inputText.trim())
       setTranslatedText(result)
       setStep('guest-result')
     } catch {
@@ -163,7 +209,19 @@ export default function AskForHelpModal({ onClose }) {
                 style={{ ...styles.micBtn, ...(isListening ? styles.micBtnActive : {}) }}
                 onClick={isListening ? stopListening : startListening}
               >
-                <span style={styles.micIcon}>🎤</span>
+                {isListening ? (
+                  <div style={styles.waveWrap}>
+                    {bars.map((v, i) => (
+                      <div key={i} style={{
+                        ...styles.waveBar,
+                        height: `${Math.max(4, v * 44)}px`,
+                        opacity: 0.5 + v * 0.5,
+                      }} />
+                    ))}
+                  </div>
+                ) : (
+                  <span style={styles.micIcon}>🎤</span>
+                )}
                 <span style={styles.micLabel}>{isListening ? t.listeningText : t.tapMic}</span>
               </button>
 
@@ -444,6 +502,20 @@ const styles = {
     border: '1.5px solid transparent',
   },
   micIcon: { fontSize: 26 },
+  waveWrap: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 3,
+    height: 48,
+  },
+  waveBar: {
+    width: 4,
+    borderRadius: 3,
+    background: '#2A2720',
+    transition: 'height 0.08s ease',
+    minHeight: 4,
+    flexShrink: 0,
+  },
   micLabel: {
     fontSize: 12,
     fontWeight: 600,

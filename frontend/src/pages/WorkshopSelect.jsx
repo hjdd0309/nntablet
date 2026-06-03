@@ -1,80 +1,65 @@
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { workshops } from '../data/workshops'
 import { useT } from '../i18n'
 import Header from '../components/Header'
+import L from 'leaflet'
+import 'leaflet/dist/leaflet.css'
 
-const MAP_CENTER = { lat: 37.28400, lng: 127.01630 }
-const MAP_LEVEL = 4
+const MAP_CENTER = [37.28400, 127.01630]
 
-function KakaoMap({ onWorkshopClick, activeId }) {
+function LeafletMap({ onWorkshopClick, activeId }) {
   const containerRef = useRef(null)
   const mapRef = useRef(null)
   const markersRef = useRef([])
-  const [mapError, setMapError] = useState(null)
 
   useEffect(() => {
-    const initMap = () => {
-      if (!containerRef.current) return
-      try {
-        const { kakao } = window
-        const center = new kakao.maps.LatLng(MAP_CENTER.lat, MAP_CENTER.lng)
-        const map = new kakao.maps.Map(containerRef.current, { center, level: MAP_LEVEL })
-        mapRef.current = map
+    if (!containerRef.current || mapRef.current) return
 
-        workshops.forEach((w) => {
-          const position = new kakao.maps.LatLng(w.lat, w.lng)
-          const content = document.createElement('div')
-          content.innerHTML = `
-            <div style="display:flex;flex-direction:column;align-items:center;cursor:pointer;user-select:none;">
-              <div style="background:#2A2720;color:#FAF8F2;padding:5px 10px;border-radius:20px;font-size:12px;font-weight:700;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.25);font-family:sans-serif;">${w.name}</div>
-              <div style="width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:7px solid #2A2720;margin-top:-1px;"></div>
-            </div>
-          `
-          content.addEventListener('click', () => onWorkshopClick(w))
-          const overlay = new kakao.maps.CustomOverlay({ position, content, yAnchor: 1 })
-          overlay.setMap(map)
-          markersRef.current.push({ id: w.id, overlay, position })
-        })
-      } catch (e) {
-        setMapError(e.message)
-      }
-    }
+    const map = L.map(containerRef.current, { zoomControl: true, attributionControl: false }).setView(MAP_CENTER, 16)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map)
+    mapRef.current = map
 
-    if (window.kakao?.maps) {
-      window.kakao.maps.load(initMap)
-    } else {
-      setMapError('카카오 지도 SDK를 불러오지 못했습니다.\n카카오 개발자 콘솔 > 플랫폼 > Web에\nhttp://localhost:5173 등록 여부를 확인해주세요.')
-    }
+    workshops.forEach((w) => {
+      const icon = L.divIcon({
+        className: '',
+        html: `<div style="display:flex;flex-direction:column;align-items:center;cursor:pointer;">
+          <div style="background:#2A2720;color:#FAF8F2;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.25);font-family:sans-serif;">${w.name}</div>
+          <div style="width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:7px solid #2A2720;margin-top:-1px;"></div>
+        </div>`,
+        iconAnchor: [0, 0],
+      })
+      const marker = L.marker([w.lat, w.lng], { icon }).addTo(map)
+      marker.on('click', () => onWorkshopClick(w))
+      markersRef.current.push({ id: w.id, marker, latlng: [w.lat, w.lng] })
+    })
+
+    return () => { map.remove(); mapRef.current = null }
   }, [])
 
   useEffect(() => {
     if (!mapRef.current || !activeId) return
     const found = markersRef.current.find((m) => m.id === activeId)
-    if (found) mapRef.current.panTo(found.position)
+    if (found) mapRef.current.panTo(found.latlng)
   }, [activeId])
-
-  if (mapError) return (
-    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 12, background: '#F0EDE5', padding: 24 }}>
-      <span style={{ fontSize: 32 }}>🗺️</span>
-      <p style={{ fontSize: 13, color: '#7A7570', textAlign: 'center', fontFamily: 'var(--font)', lineHeight: 1.6 }}>{mapError}</p>
-    </div>
-  )
 
   return <div ref={containerRef} style={{ width: '100%', height: '100%' }} />
 }
 
 export default function WorkshopSelect() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const isExplore = location.state?.explore === true
   const { setSelectedWorkshop, language } = useApp()
   const t = useT()
   const isKo = language === '한국어'
   const [activeId, setActiveId] = useState(null)
 
   const handleSelect = (workshop) => {
+    setActiveId(workshop.id)
     setSelectedWorkshop(workshop)
-    navigate('/overview')
+    if (!isExplore) navigate('/overview')
   }
 
   const handleMarkerClick = (workshop) => {
@@ -88,7 +73,7 @@ export default function WorkshopSelect() {
       <div style={styles.mapRow}>
       {/* Left panel */}
       <div style={styles.listPanel}>
-        <h2 style={styles.listTitle}>{t.selectWorkshop}</h2>
+        <h2 style={styles.listTitle}>{isExplore ? t.exploreNearby : t.selectWorkshop}</h2>
         <div style={styles.list}>
           {workshops.map((w) => (
             <button
@@ -120,7 +105,7 @@ export default function WorkshopSelect() {
 
       {/* Map panel */}
       <div style={styles.mapPanel}>
-        <KakaoMap onWorkshopClick={handleMarkerClick} activeId={activeId} />
+        <LeafletMap onWorkshopClick={handleMarkerClick} activeId={activeId} />
 
         {/* Active workshop popup */}
         {activeId && (() => {
@@ -129,9 +114,11 @@ export default function WorkshopSelect() {
             <div style={styles.popup}>
               <strong style={styles.popupName}>{isKo ? w.name : w.nameEn}</strong>
               <span style={styles.popupType}>{isKo ? w.type : w.typeEn}</span>
-              <button style={styles.popupBtn} onClick={() => handleSelect(w)}>
-                {t.readyToEnjoyBtn} →
-              </button>
+              {!isExplore && (
+                <button style={styles.popupBtn} onClick={() => handleSelect(w)}>
+                  {t.readyToEnjoyBtn} →
+                </button>
+              )}
             </div>
           )
         })()}

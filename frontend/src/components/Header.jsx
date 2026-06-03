@@ -14,9 +14,14 @@ const LANG_MAP = {
 
 export default function Header({ showBack = true, showHome = false, showCall = false, showCamera = false, showVideo = false, backTo, onBack }) {
   const navigate = useNavigate()
-  const { language, setShowHelpModal } = useApp()
+  const { language, setShowHelpModal, recordMode, nextShotCountdown } = useApp()
   const t = useT()
   const [time, setTime] = useState('')
+
+  const fmtCountdown = (s) => {
+    if (s === null) return ''
+    return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`
+  }
 
   useEffect(() => {
     const update = () => {
@@ -59,7 +64,16 @@ export default function Header({ showBack = true, showHome = false, showCall = f
 
       <div style={styles.right}>
         <span style={styles.time}>{time}</span>
-        {showCamera && <button style={styles.iconBtn}>📷</button>}
+        {showCamera && !recordMode && (
+          <button style={styles.iconBtn}>📷</button>
+        )}
+        {recordMode && nextShotCountdown !== null && (
+          <div style={styles.camTimer}>
+            <span>📷</span>
+            <span style={styles.camTimerLabel}>다음 촬영까지</span>
+            <span style={styles.camTimerText}>{fmtCountdown(nextShotCountdown)}</span>
+          </div>
+        )}
         {showVideo && <button style={styles.iconBtn}>📹</button>}
         <span style={styles.langBadge}>{LANG_MAP[language] || 'ENG'}</span>
         {showHome && (
@@ -74,6 +88,7 @@ export default function Header({ showBack = true, showHome = false, showCall = f
 
 const styles = {
   header: {
+    position: 'relative',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -89,19 +104,20 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     gap: 10,
-    minWidth: 140,
+    zIndex: 1,
   },
   center: {
-    flex: 1,
-    display: 'flex',
-    justifyContent: 'center',
+    position: 'absolute',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    pointerEvents: 'none',
   },
   right: {
     display: 'flex',
     alignItems: 'center',
     gap: 10,
-    minWidth: 140,
     justifyContent: 'flex-end',
+    zIndex: 1,
   },
   logo: {
     height: 36,
@@ -144,6 +160,28 @@ const styles = {
     fontWeight: 600,
     color: '#2A2720',
   },
+  camTimer: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 5,
+    background: 'rgba(255,255,255,0.7)',
+    border: '1px solid rgba(0,0,0,0.1)',
+    borderRadius: 10,
+    padding: '4px 10px',
+    fontSize: 16,
+  },
+  camTimerLabel: {
+    fontSize: 12,
+    fontWeight: 600,
+    color: '#7A7570',
+    fontFamily: 'var(--font)',
+  },
+  camTimerText: {
+    fontSize: 13,
+    fontWeight: 700,
+    color: '#2A2720',
+    fontFamily: 'var(--font)',
+  },
   langBadge: {
     fontSize: 13,
     fontWeight: 700,
@@ -160,6 +198,27 @@ const styles = {
     borderRadius: 10,
     padding: '4px 8px',
     cursor: 'pointer',
+  },
+  recBadge: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 5,
+    fontSize: 13,
+    fontWeight: 700,
+    color: '#2A2720',
+    background: 'rgba(255,68,68,0.10)',
+    border: '1px solid rgba(255,68,68,0.28)',
+    borderRadius: 20,
+    padding: '4px 10px',
+    fontFamily: 'var(--font)',
+    flexShrink: 0,
+  },
+  recDot: {
+    width: 7,
+    height: 7,
+    borderRadius: '50%',
+    background: '#FF4444',
+    flexShrink: 0,
   },
   homeBtn: {
     display: 'flex',

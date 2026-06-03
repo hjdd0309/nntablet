@@ -113,10 +113,17 @@ const translations = {
     craftBest: '최고 추천',
     craftArtisanPick: '장인 추천',
 
+    emailPlaceholder: '이메일 주소를 입력하세요',
+    sendEmail: '이메일로 보내기',
+    emailSending: '전송 중...',
+    emailSent: '이메일을 보냈어요!',
+    emailError: '전송에 실패했어요. 다시 시도해주세요.',
+
     artworkComplete: '작품이 완성됐어요!',
     exploreNearby: '주변 탐색하기',
     shareMyArtwork: '작품 공유하기',
     processHistory: '제작 과정 보기',
+    exitSession: '종료하기',
   },
   en: {
     back: 'Back',
@@ -230,10 +237,17 @@ const translations = {
     craftBest: 'Best',
     craftArtisanPick: 'Artisan pick',
 
+    emailPlaceholder: 'Enter your email address',
+    sendEmail: 'Send via Email',
+    emailSending: 'Sending...',
+    emailSent: 'Email sent!',
+    emailError: 'Failed to send. Please try again.',
+
     artworkComplete: 'Your artwork is complete!',
     exploreNearby: 'Explore Nearby',
     shareMyArtwork: 'Share My Artwork',
     processHistory: 'Process History',
+    exitSession: 'Exit',
   },
 }
 
