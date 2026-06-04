@@ -241,6 +241,16 @@ export default function AskForHelpModal({ onClose }) {
             <div style={styles.ownerMicSection}>
               <p style={styles.ownerMicLabel}>{t.moreQuestions}</p>
 
+              <div style={styles.inputWrap}>
+                <textarea
+                  style={styles.textarea}
+                  value={ownerMicText}
+                  onChange={(e) => { setOwnerMicText(e.target.value); setOwnerMicResult('') }}
+                  placeholder={t.typeHerePlaceholder}
+                  rows={3}
+                />
+              </div>
+
               <div style={styles.inputActions}>
                 <button
                   style={{ ...styles.micBtn, ...(isListening ? styles.micBtnActive : {}) }}
@@ -269,16 +279,6 @@ export default function AskForHelpModal({ onClose }) {
                     {ownerMicLoading ? t.translatingText : t.translateBtn}
                   </button>
                 )}
-              </div>
-
-              <div style={styles.inputWrap}>
-                <textarea
-                  style={styles.textarea}
-                  value={ownerMicText}
-                  onChange={(e) => { setOwnerMicText(e.target.value); setOwnerMicResult('') }}
-                  placeholder={t.typeHerePlaceholder}
-                  rows={3}
-                />
               </div>
 
               {error && !isListening && <p style={{ ...styles.ownerMicHint, color: '#C0392B' }}>{error}</p>}
