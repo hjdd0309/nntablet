@@ -33,10 +33,7 @@ html, body {
 
 #root {
   width: 100%;
-  height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  height: 100%;
   background: var(--cream);
 }
 
@@ -66,18 +63,11 @@ input {
 }
 
 .app-container {
-  width: 1210px;
-  height: 834px;
+  width: 100vw;
+  height: 100vh;
   position: relative;
   overflow: hidden;
   background: var(--cream);
-}
-
-@media (max-width: 1210px) {
-  .app-container {
-    width: 100vw;
-    height: 100vh;
-  }
 }
 
 /* ── Page enter animation ─────────────────────────── */

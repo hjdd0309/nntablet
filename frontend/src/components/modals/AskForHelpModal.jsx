@@ -125,6 +125,20 @@ export default function AskForHelpModal({ onClose }) {
     })
   }
 
+  const handleOwnerTextTranslate = async () => {
+    if (!ownerMicText.trim()) return
+    setOwnerMicLoading(true)
+    setOwnerMicResult('')
+    setError('')
+    try {
+      const result = await fetchTranslation(ownerMicText.trim())
+      setOwnerMicResult(result)
+    } catch {
+      setError(t.translationError)
+    }
+    setOwnerMicLoading(false)
+  }
+
   const stopListening = () => {
     recRef.current?.stop()
     setIsListening(false)
@@ -226,30 +240,48 @@ export default function AskForHelpModal({ onClose }) {
 
             <div style={styles.ownerMicSection}>
               <p style={styles.ownerMicLabel}>{t.moreQuestions}</p>
-              <button
-                style={{ ...styles.micBtn, ...(isListening ? styles.micBtnActive : {}), width: '100%' }}
-                onClick={handleOwnerMic}
-              >
-                {isListening ? (
-                  <div style={styles.waveWrap}>
-                    {bars.map((v, i) => (
-                      <div key={i} style={{ ...styles.waveBar, height: `${Math.max(4, v * 44)}px`, opacity: 0.5 + v * 0.5 }} />
-                    ))}
-                  </div>
-                ) : (
-                  <span style={styles.micIcon}>🎤</span>
-                )}
-                <span style={styles.micLabel}>{isListening ? t.listeningText : t.tapMic}</span>
-              </button>
-              {isListening && (
-                <button style={styles.stopBtn} onClick={stopListening}>
-                  ■ 멈추기
+
+              <div style={styles.inputActions}>
+                <button
+                  style={{ ...styles.micBtn, ...(isListening ? styles.micBtnActive : {}) }}
+                  onClick={handleOwnerMic}
+                >
+                  {isListening ? (
+                    <div style={styles.waveWrap}>
+                      {bars.map((v, i) => (
+                        <div key={i} style={{ ...styles.waveBar, height: `${Math.max(4, v * 44)}px`, opacity: 0.5 + v * 0.5 }} />
+                      ))}
+                    </div>
+                  ) : (
+                    <span style={styles.micIcon}>🎤</span>
+                  )}
+                  <span style={styles.micLabel}>{isListening ? t.listeningText : t.tapMic}</span>
                 </button>
-              )}
+
+                {isListening ? (
+                  <button style={styles.stopBtn} onClick={stopListening}>■ 멈추기</button>
+                ) : (
+                  <button
+                    style={{ ...styles.translateBtn, ...(!ownerMicText.trim() || ownerMicLoading ? styles.translateBtnDisabled : {}) }}
+                    onClick={handleOwnerTextTranslate}
+                    disabled={!ownerMicText.trim() || ownerMicLoading}
+                  >
+                    {ownerMicLoading ? t.translatingText : t.translateBtn}
+                  </button>
+                )}
+              </div>
+
+              <div style={styles.inputWrap}>
+                <textarea
+                  style={styles.textarea}
+                  value={ownerMicText}
+                  onChange={(e) => { setOwnerMicText(e.target.value); setOwnerMicResult('') }}
+                  placeholder={t.typeHerePlaceholder}
+                  rows={3}
+                />
+              </div>
+
               {error && !isListening && <p style={{ ...styles.ownerMicHint, color: '#C0392B' }}>{error}</p>}
-              {ownerMicText && !ownerMicResult && (
-                <p style={styles.ownerMicDetected}>{ownerMicText}</p>
-              )}
               {ownerMicLoading && <p style={styles.ownerMicHint}>{t.translatingText}</p>}
               {ownerMicResult && (
                 <div style={styles.ownerMicResult}>
