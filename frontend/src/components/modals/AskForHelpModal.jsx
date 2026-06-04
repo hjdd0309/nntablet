@@ -147,6 +147,7 @@ export default function AskForHelpModal({ onClose }) {
   }
 
   const goBack = () => {
+    if (isListening) stopListening()
     if (step === 'guest-result') { resetGuest(); return }
     setStep('role')
   }
@@ -214,6 +215,11 @@ export default function AskForHelpModal({ onClose }) {
                 )}
                 <span style={styles.micLabel}>{isListening ? t.listeningText : t.tapMic}</span>
               </button>
+              {isListening && (
+                <button style={styles.stopBtn} onClick={stopListening}>
+                  ⏹ 멈추기
+                </button>
+              )}
               {ownerMicLoading && <p style={styles.ownerMicHint}>{t.translatingText}</p>}
               {ownerMicResult ? (
                 <div style={styles.ownerMicResult}>
@@ -262,16 +268,22 @@ export default function AskForHelpModal({ onClose }) {
                 <span style={styles.micLabel}>{isListening ? t.listeningText : t.tapMic}</span>
               </button>
 
-              <button
-                style={{
-                  ...styles.translateBtn,
-                  ...((!inputText.trim() || isTranslating) ? styles.translateBtnDisabled : {}),
-                }}
-                onClick={handleTranslate}
-                disabled={!inputText.trim() || isTranslating}
-              >
-                {isTranslating ? t.translatingText : t.translateBtn}
-              </button>
+              {isListening ? (
+                <button style={styles.stopBtn} onClick={stopListening}>
+                  ⏹ 멈추기
+                </button>
+              ) : (
+                <button
+                  style={{
+                    ...styles.translateBtn,
+                    ...((!inputText.trim() || isTranslating) ? styles.translateBtnDisabled : {}),
+                  }}
+                  onClick={handleTranslate}
+                  disabled={!inputText.trim() || isTranslating}
+                >
+                  {isTranslating ? t.translatingText : t.translateBtn}
+                </button>
+              )}
             </div>
           </>
         )}
@@ -299,23 +311,6 @@ export default function AskForHelpModal({ onClose }) {
           </>
         )}
 
-        {/* ── Other questions (owner-facing voice) ── */}
-        {step === 'other-questions' && (
-          <>
-            <p style={styles.subtitle}>{t.speakClearly}</p>
-            <div style={styles.translationCard}>
-              <p style={{ ...styles.translationText, color: '#7A7570' }}>
-                {isListening ? t.listeningText : t.tapMic}
-              </p>
-            </div>
-            <button
-              style={{ ...styles.micBtnLarge, ...(isListening ? styles.micBtnActive : {}) }}
-              onClick={() => setIsListening(v => !v)}
-            >
-              <span style={styles.micIcon}>🎤</span>
-            </button>
-          </>
-        )}
       </div>
     </div>
   )
@@ -609,6 +604,18 @@ const styles = {
   translateBtnDisabled: {
     opacity: 0.35,
     cursor: 'not-allowed',
+  },
+  stopBtn: {
+    flex: 1,
+    padding: '14px 24px',
+    borderRadius: 16,
+    background: 'rgba(220,60,60,0.12)',
+    border: '1.5px solid rgba(220,60,60,0.3)',
+    fontSize: 16,
+    fontWeight: 700,
+    color: '#C0392B',
+    cursor: 'pointer',
+    fontFamily: 'var(--font)',
   },
 
   // Guest result

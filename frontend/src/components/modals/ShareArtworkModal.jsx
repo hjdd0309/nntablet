@@ -34,8 +34,10 @@ export default function ShareArtworkModal({ onClose }) {
     // Storage 파일 삭제
     const storagePaths = toDelete
       .map(r => {
-        try { return decodeURIComponent(new URL(r.image_url).pathname.split('/object/public/nntablet/')[1]) }
-        catch { return null }
+        try {
+          const path = new URL(r.image_url).pathname.split('/object/public/nntablet/')[1]
+          return path ? decodeURIComponent(path) : null
+        } catch { return null }
       })
       .filter(Boolean)
     if (storagePaths.length > 0) {
