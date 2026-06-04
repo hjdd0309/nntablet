@@ -94,7 +94,15 @@ export default function AskForHelpModal({ onClose }) {
       setIsListening(false)
       stopVisualization()
     }
-    rec.onerror = () => { setIsListening(false); stopVisualization() }
+    rec.onerror = (e) => {
+      setIsListening(false)
+      stopVisualization()
+      if (e.error === 'not-allowed') setError('마이크 권한이 필요해요. 브라우저 설정에서 허용해주세요.')
+      else if (e.error === 'no-speech') setError('음성이 감지되지 않았어요. 다시 시도해주세요.')
+      else if (e.error === 'network') setError('네트워크 오류가 발생했어요.')
+      else if (e.error === 'service-not-allowed') setError('음성 인식을 사용하려면 HTTPS가 필요해요.')
+      else setError('음성 인식 오류: ' + e.error)
+    }
     rec.onend = () => { setIsListening(false); stopVisualization() }
     recRef.current = rec
     rec.start()
@@ -217,9 +225,10 @@ export default function AskForHelpModal({ onClose }) {
               </button>
               {isListening && (
                 <button style={styles.stopBtn} onClick={stopListening}>
-                  ⏹ 멈추기
+                  ■ 멈추기
                 </button>
               )}
+              {error && !isListening && <p style={{ ...styles.ownerMicHint, color: '#C0392B' }}>{error}</p>}
               {ownerMicLoading && <p style={styles.ownerMicHint}>{t.translatingText}</p>}
               {ownerMicResult ? (
                 <div style={styles.ownerMicResult}>
@@ -270,7 +279,7 @@ export default function AskForHelpModal({ onClose }) {
 
               {isListening ? (
                 <button style={styles.stopBtn} onClick={stopListening}>
-                  ⏹ 멈추기
+                  ■ 멈추기
                 </button>
               ) : (
                 <button
@@ -609,11 +618,11 @@ const styles = {
     flex: 1,
     padding: '14px 24px',
     borderRadius: 16,
-    background: 'rgba(220,60,60,0.12)',
-    border: '1.5px solid rgba(220,60,60,0.3)',
+    background: 'rgba(0,0,0,0.06)',
+    border: '1.5px solid rgba(0,0,0,0.12)',
     fontSize: 16,
     fontWeight: 700,
-    color: '#C0392B',
+    color: '#7A7570',
     cursor: 'pointer',
     fontFamily: 'var(--font)',
   },
