@@ -23,13 +23,16 @@ async function fetchTranslation(text) {
 export default function AskForHelpModal({ onClose }) {
   const t = useT()
   const { language } = useApp()
-  const [step, setStep] = useState(() => language === '한국어' ? 'role' : 'guest-input')
+  const [step, setStep] = useState('role')
   const [inputText, setInputText] = useState('')
   const [translatedText, setTranslatedText] = useState('')
   const [isListening, setIsListening] = useState(false)
   const [isTranslating, setIsTranslating] = useState(false)
   const [error, setError] = useState('')
   const [bars, setBars] = useState(Array(24).fill(0))
+  const [ownerMicText, setOwnerMicText] = useState('')
+  const [ownerMicResult, setOwnerMicResult] = useState('')
+  const [ownerMicLoading, setOwnerMicLoading] = useState(false)
   const recRef = useRef(null)
   const audioCtxRef = useRef(null)
   const analyserRef = useRef(null)
@@ -77,7 +80,7 @@ export default function AskForHelpModal({ onClose }) {
   const tgtCode = 'ko'
   const isKorean = srcCode === 'ko'
 
-  const startListening = () => {
+  const startListening = (onResult) => {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition
     if (!SR) { setError(t.speechNotSupported); return }
     const rec = new SR()
@@ -85,7 +88,9 @@ export default function AskForHelpModal({ onClose }) {
     rec.continuous = false
     rec.interimResults = false
     rec.onresult = (e) => {
-      setInputText(prev => prev + e.results[0][0].transcript)
+      const transcript = e.results[0][0].transcript
+      if (onResult) onResult(transcript)
+      else setInputText(prev => prev + transcript)
       setIsListening(false)
       stopVisualization()
     }
@@ -95,6 +100,21 @@ export default function AskForHelpModal({ onClose }) {
     rec.start()
     setIsListening(true)
     startVisualization()
+  }
+
+  const handleOwnerMic = () => {
+    if (isListening) { stopListening(); return }
+    setOwnerMicResult('')
+    setOwnerMicText('')
+    startListening(async (text) => {
+      setOwnerMicText(text)
+      setOwnerMicLoading(true)
+      try {
+        const result = await fetchTranslation(text)
+        setOwnerMicResult(result)
+      } catch {}
+      setOwnerMicLoading(false)
+    })
   }
 
   const stopListening = () => {
@@ -128,8 +148,7 @@ export default function AskForHelpModal({ onClose }) {
 
   const goBack = () => {
     if (step === 'guest-result') { resetGuest(); return }
-    if (isKorean) setStep('role')
-    else onClose()
+    setStep('role')
   }
 
   return (
@@ -149,42 +168,60 @@ export default function AskForHelpModal({ onClose }) {
           <>
             <p style={styles.subtitle}>{t.selectRoleSubtitle}</p>
             <div style={styles.cardRow}>
-              <button style={styles.roleCard} onClick={() => setStep('owner-questions')}>
+              <button style={styles.roleCard} onClick={() => setStep('guest-input')}>
                 <span style={styles.cardArrow}>→</span>
                 <span style={styles.cardLabel}>
                   {t.imOwner.split('\n').map((line, i) => <span key={i}>{i > 0 && <br />}{line}</span>)}
                 </span>
               </button>
-              <button style={{ ...styles.roleCard, ...styles.roleCardActive }} onClick={() => setStep('guest-input')}>
+              <button style={{ ...styles.roleCard, ...styles.roleCardActive }} onClick={() => setStep('owner-questions')}>
                 <span style={styles.cardArrow}>→</span>
                 <span style={styles.cardLabel}>
                   {t.imGuest.split('\n').map((line, i) => <span key={i}>{i > 0 && <br />}{line}</span>)}
                 </span>
               </button>
             </div>
-            <button style={styles.otherBtn} onClick={() => setStep('other-questions')}>
-              <span style={styles.micCircle}>🎤</span>
-              <span>{t.otherQuestions}</span>
-            </button>
           </>
         )}
 
-        {/* ── Owner: common questions ── */}
+        {/* ── 손님: question cards + mic ── */}
         {step === 'owner-questions' && (
           <>
             <p style={styles.subtitle}>{t.selectQuestionSubtitle}</p>
             <div style={styles.questionsGrid}>
-              {Array.from({ length: 6 }).map((_, i) => (
-                <button key={i} style={{ ...styles.questionCard, ...(i === 0 ? styles.questionCardSelected : {}) }}>
-                  <div style={styles.questionFace}>😞</div>
-                  <span style={styles.questionText}>{t.ownerQuestion}</span>
+              {t.guestQuestions.map((q, i) => (
+                <button key={i} style={styles.questionCard}>
+                  <div style={styles.questionFace}>{q.emoji}</div>
+                  <span style={styles.questionText}>{q.text}</span>
                 </button>
               ))}
             </div>
-            <button style={styles.otherBtn} onClick={() => setStep('other-questions')}>
-              <span style={styles.micCircle}>🎤</span>
-              <span>{t.otherQuestions}</span>
-            </button>
+
+            <div style={styles.ownerMicSection}>
+              <p style={styles.ownerMicLabel}>{t.moreQuestions}</p>
+              <button
+                style={{ ...styles.micBtn, ...(isListening ? styles.micBtnActive : {}), width: '100%' }}
+                onClick={handleOwnerMic}
+              >
+                {isListening ? (
+                  <div style={styles.waveWrap}>
+                    {bars.map((v, i) => (
+                      <div key={i} style={{ ...styles.waveBar, height: `${Math.max(4, v * 44)}px`, opacity: 0.5 + v * 0.5 }} />
+                    ))}
+                  </div>
+                ) : (
+                  <span style={styles.micIcon}>🎤</span>
+                )}
+                <span style={styles.micLabel}>{isListening ? t.listeningText : t.tapMic}</span>
+              </button>
+              {ownerMicLoading && <p style={styles.ownerMicHint}>{t.translatingText}</p>}
+              {ownerMicResult ? (
+                <div style={styles.ownerMicResult}>
+                  <p style={styles.resultText}>{ownerMicResult}</p>
+                  <p style={styles.originalText}><span style={styles.originalLabel}>{t.yourMessage}:</span> {ownerMicText}</p>
+                </div>
+              ) : null}
+            </div>
           </>
         )}
 
@@ -446,6 +483,40 @@ const styles = {
     color: '#2A2720',
     textAlign: 'center',
     lineHeight: 1.4,
+  },
+
+  ownerMicSection: {
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 10,
+  },
+  ownerMicLabel: {
+    fontSize: 13,
+    fontWeight: 700,
+    color: '#7A7570',
+    fontFamily: 'var(--font)',
+    margin: 0,
+    textAlign: 'center',
+  },
+  ownerMicHint: {
+    fontSize: 13,
+    color: '#ADA9A4',
+    textAlign: 'center',
+    margin: 0,
+    fontFamily: 'var(--font)',
+  },
+  ownerMicResult: {
+    width: '100%',
+    background: 'rgba(255,255,255,0.7)',
+    backdropFilter: 'blur(12px)',
+    border: '1.5px solid rgba(255,255,255,0.8)',
+    borderRadius: 16,
+    padding: '20px 24px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 8,
+    alignItems: 'center',
   },
 
   // Guest input

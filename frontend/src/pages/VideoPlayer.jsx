@@ -50,7 +50,7 @@ export default function VideoPlayer() {
 
         {/* Play/Pause overlay */}
         <button
-          style={{...styles.playBtn, ...(isPlaying ? styles.playBtnVisible : styles.playBtnVisible)}}
+          style={{...styles.playBtn, ...(isPlaying ? styles.playBtnHidden : styles.playBtnVisible)}}
           onClick={(e) => { e.stopPropagation(); setIsPlaying(v => !v) }}
         >
           <span style={styles.playIcon}>{isPlaying ? '⏸' : '▶'}</span>
@@ -125,6 +125,10 @@ const styles = {
   },
   playBtnVisible: {
     opacity: 1,
+  },
+  playBtnHidden: {
+    opacity: 0,
+    pointerEvents: 'none',
   },
   playIcon: {
     fontSize: 28,

@@ -113,6 +113,16 @@ const translations = {
     craftBest: '최고 추천',
     craftArtisanPick: '장인 추천',
 
+    guestQuestions: [
+      { emoji: '🤔', text: '이게 어떻게 하는 건가요?' },
+      { emoji: '✅', text: '이거 맞나요?' },
+      { emoji: '👀', text: '다시 보여주세요' },
+      { emoji: '😅', text: '잘 모르겠어요' },
+      { emoji: '🙋', text: '도구가 필요해요' },
+      { emoji: '🎉', text: '거의 다 됐어요!' },
+    ],
+    moreQuestions: '추가로 질문하기',
+
     emailPlaceholder: '이메일 주소를 입력하세요',
     sendEmail: '이메일로 보내기',
     emailSending: '전송 중...',
@@ -236,6 +246,16 @@ const translations = {
     ],
     craftBest: 'Best',
     craftArtisanPick: 'Artisan pick',
+
+    guestQuestions: [
+      { emoji: '🤔', text: 'How do I do this?' },
+      { emoji: '✅', text: 'Is this correct?' },
+      { emoji: '👀', text: 'Please show me again' },
+      { emoji: '😅', text: "I'm not sure" },
+      { emoji: '🙋', text: 'I need a tool' },
+      { emoji: '🎉', text: "I'm almost done!" },
+    ],
+    moreQuestions: 'Ask more',
 
     emailPlaceholder: 'Enter your email address',
     sendEmail: 'Send via Email',

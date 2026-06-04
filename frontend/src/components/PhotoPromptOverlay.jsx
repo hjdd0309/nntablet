@@ -15,10 +15,10 @@ export default function PhotoPromptOverlay() {
       const id = Math.random().toString(36).substring(2, 10)
       const path = `${sessionToken}/shot_${Date.now()}_${id}.jpg`
       const { error } = await supabase.storage
-        .from('process-media')
+        .from('nntablet')
         .upload(path, file, { contentType: file.type || 'image/jpeg', upsert: true })
       if (error) throw error
-      const { data: { publicUrl } } = supabase.storage.from('process-media').getPublicUrl(path)
+      const { data: { publicUrl } } = supabase.storage.from('nntablet').getPublicUrl(path)
       const { data: session } = await supabase
         .from('craft_sessions').select('media_urls').eq('session_token', sessionToken).single()
       await supabase.from('craft_sessions')
