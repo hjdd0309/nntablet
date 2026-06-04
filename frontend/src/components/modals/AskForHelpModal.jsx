@@ -131,6 +131,24 @@ export default function AskForHelpModal({ onClose }) {
     stopVisualization()
   }
 
+  const startGuestListening = () => {
+    startListening(async (text) => {
+      setInputText(text)
+      if (!text.trim()) return
+      setIsTranslating(true)
+      setError('')
+      try {
+        const result = await fetchTranslation(text.trim())
+        setTranslatedText(result)
+        setStep('guest-result')
+      } catch {
+        setError(t.translationError)
+      } finally {
+        setIsTranslating(false)
+      }
+    })
+  }
+
   const handleTranslate = async () => {
     if (!inputText.trim()) return
     setIsTranslating(true)
@@ -229,13 +247,16 @@ export default function AskForHelpModal({ onClose }) {
                 </button>
               )}
               {error && !isListening && <p style={{ ...styles.ownerMicHint, color: '#C0392B' }}>{error}</p>}
+              {ownerMicText && !ownerMicResult && (
+                <p style={styles.ownerMicDetected}>{ownerMicText}</p>
+              )}
               {ownerMicLoading && <p style={styles.ownerMicHint}>{t.translatingText}</p>}
-              {ownerMicResult ? (
+              {ownerMicResult && (
                 <div style={styles.ownerMicResult}>
                   <p style={styles.resultText}>{ownerMicResult}</p>
                   <p style={styles.originalText}><span style={styles.originalLabel}>{t.yourMessage}:</span> {ownerMicText}</p>
                 </div>
-              ) : null}
+              )}
             </div>
           </>
         )}
@@ -259,7 +280,7 @@ export default function AskForHelpModal({ onClose }) {
             <div style={styles.inputActions}>
               <button
                 style={{ ...styles.micBtn, ...(isListening ? styles.micBtnActive : {}) }}
-                onClick={isListening ? stopListening : startListening}
+                onClick={isListening ? stopListening : startGuestListening}
               >
                 {isListening ? (
                   <div style={styles.waveWrap}>
@@ -305,13 +326,16 @@ export default function AskForHelpModal({ onClose }) {
               <span style={styles.showOwnerText}>{t.showToOwner}</span>
             </div>
 
+            {inputText && (
+              <div style={styles.detectedCard}>
+                <p style={styles.detectedLabel}>{t.yourMessage}</p>
+                <p style={styles.detectedText}>{inputText}</p>
+              </div>
+            )}
+
             <div style={styles.resultCard}>
               <p style={styles.resultText}>{translatedText}</p>
             </div>
-
-            <p style={styles.originalText}>
-              <span style={styles.originalLabel}>{t.yourMessage}:</span> {inputText}
-            </p>
 
             <div style={styles.resultBtns}>
               <button style={styles.btnNo} onClick={resetGuest}>{t.tryAgain}</button>
@@ -489,6 +513,46 @@ const styles = {
     lineHeight: 1.4,
   },
 
+  ownerMicDetected: {
+    fontSize: 16,
+    fontWeight: 600,
+    color: '#2A2720',
+    fontFamily: 'var(--font)',
+    textAlign: 'center',
+    background: 'rgba(255,255,255,0.5)',
+    borderRadius: 12,
+    padding: '10px 16px',
+    width: '100%',
+    margin: 0,
+  },
+  detectedCard: {
+    width: '100%',
+    background: 'rgba(255,255,255,0.5)',
+    backdropFilter: 'blur(8px)',
+    border: '1px solid rgba(255,255,255,0.7)',
+    borderRadius: 16,
+    padding: '14px 20px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 4,
+  },
+  detectedLabel: {
+    fontSize: 11,
+    fontWeight: 700,
+    color: '#ADA9A4',
+    fontFamily: 'var(--font)',
+    margin: 0,
+    textTransform: 'uppercase',
+    letterSpacing: '0.05em',
+  },
+  detectedText: {
+    fontSize: 18,
+    fontWeight: 600,
+    color: '#2A2720',
+    fontFamily: 'var(--font)',
+    margin: 0,
+    lineHeight: 1.4,
+  },
   ownerMicSection: {
     width: '100%',
     display: 'flex',
