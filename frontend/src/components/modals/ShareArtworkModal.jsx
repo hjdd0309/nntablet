@@ -21,17 +21,45 @@ export default function ShareArtworkModal({ onClose }) {
     setStep('preview')
   }
 
+  const pruneGallery = async () => {
+    const MAX = 200
+    const { data: rows, error } = await supabase
+      .from('gallery')
+      .select('id, image_url')
+      .order('created_at', { ascending: true })
+    if (error || !rows || rows.length <= MAX) return
+
+    const toDelete = rows.slice(0, rows.length - MAX)
+
+    // Storage 파일 삭제
+    const storagePaths = toDelete
+      .map(r => {
+        try { return decodeURIComponent(new URL(r.image_url).pathname.split('/object/public/nntablet/')[1]) }
+        catch { return null }
+      })
+      .filter(Boolean)
+    if (storagePaths.length > 0) {
+      await supabase.storage.from('nntablet').remove(storagePaths)
+    }
+
+    // DB row 삭제
+    const ids = toDelete.map(r => r.id)
+    await supabase.from('gallery').delete().in('id', ids)
+  }
+
   const handleUpload = async () => {
     if (!photoBlob) return
     setStep('uploading')
     try {
       const id = generateId()
-      const path = `artwork/${id}.jpg`
+      const mimeType = photoBlob.type || 'image/jpeg'
+      const ext = mimeType.split('/')[1]?.replace('jpeg', 'jpg') ?? 'jpg'
+      const path = `artwork/${id}.${ext}`
       const { error: uploadErr } = await supabase.storage
-        .from('process-media')
-        .upload(path, photoBlob, { contentType: 'image/jpeg', upsert: true })
+        .from('nntablet')
+        .upload(path, photoBlob, { contentType: mimeType, upsert: true })
       if (uploadErr) throw uploadErr
-      const { data: { publicUrl } } = supabase.storage.from('process-media').getPublicUrl(path)
+      const { data: { publicUrl } } = supabase.storage.from('nntablet').getPublicUrl(path)
       const { error: dbErr } = await supabase.from('gallery').insert({
         image_url: publicUrl,
         username: username.trim() || '익명',
@@ -39,8 +67,13 @@ export default function ShareArtworkModal({ onClose }) {
         saves: 0,
       })
       if (dbErr) throw dbErr
+
+      // 200개 초과분 정리 (실패해도 업로드 성공으로 처리)
+      pruneGallery().catch(console.error)
+
       setStep('done')
     } catch (e) {
+      console.error('Upload error:', e)
       alert('업로드 실패: ' + e.message)
       setStep('preview')
     }

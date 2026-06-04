@@ -122,7 +122,8 @@ const styles = {
     justifyContent: 'center',
     gap: 16,
     zIndex: 2,
-    padding: '0 40px 32px',
+    padding: '16px 40px 32px',
+    overflowY: 'auto',
   },
   title: {
     fontSize: 28,
