@@ -64,7 +64,12 @@ export default function SessionView() {
         </div>
       ) : (
         <div style={v.videoWrap}>
-          <video src={urls[0]} controls style={v.video} />
+          <video
+          src={urls[0]}
+          controls
+          style={v.video}
+          onCanPlay={(e) => { e.target.playbackRate = 2 }}
+        />
         </div>
       )}
 

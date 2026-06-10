@@ -1,6 +1,5 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import logo from '../assets/로고.png'
 
 export default function SplashScreen() {
   const navigate = useNavigate()
@@ -11,11 +10,7 @@ export default function SplashScreen() {
   }, [navigate])
 
   return (
-    <div style={styles.container} onClick={() => navigate('/language')}>
-      <div style={styles.logoWrap}>
-        <img src={logo} alt="나녕" style={styles.logo} />
-      </div>
-    </div>
+    <div style={styles.container} onClick={() => navigate('/language')} />
   )
 }
 
@@ -23,21 +18,10 @@ const styles = {
   container: {
     width: '100%',
     height: '100%',
-    background: '#FAF8F2',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundImage: 'url(/스플래시.png)',
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
     cursor: 'pointer',
-  },
-  logoWrap: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logo: {
-    maxWidth: '60%',
-    maxHeight: '40%',
-    objectFit: 'contain',
-    userSelect: 'none',
   },
 }

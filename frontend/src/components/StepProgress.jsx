@@ -3,13 +3,13 @@ import { useT } from '../i18n'
 export default function StepProgress({ currentStep = 0 }) {
   const t = useT()
   const STEPS = [
-    { labelKey: 'stepOverview', icon: '✦' },
-    { labelKey: 'stepProcessLog', icon: '❋' },
-    { labelKey: 'stepChooseDesign', icon: '✿' },
-    { labelKey: 'stepSketching', icon: '◉' },
-    { labelKey: 'stepHandcrafting', icon: '☁' },
-    { labelKey: 'stepSelectPackage', icon: '❄' },
-    { labelKey: 'stepCompletion', icon: '✕' },
+    { labelKey: 'stepOverview' },
+    { labelKey: 'stepProcessLog' },
+    { labelKey: 'stepChooseDesign' },
+    { labelKey: 'stepSketching' },
+    { labelKey: 'stepHandcrafting' },
+    { labelKey: 'stepSelectPackage' },
+    { labelKey: 'stepCompletion' },
   ]
 
   return (
@@ -17,6 +17,8 @@ export default function StepProgress({ currentStep = 0 }) {
       {STEPS.map((step, idx) => {
         const isActive = idx === currentStep
         const isPast = idx < currentStep
+        const isSelected = isActive || isPast
+        const imgSrc = isSelected ? `/${idx + 1}.png` : `/${idx + 1}_.png`
         return (
           <div key={step.labelKey} style={styles.step}>
             <div style={{
@@ -24,7 +26,7 @@ export default function StepProgress({ currentStep = 0 }) {
               ...(isActive ? styles.iconActive : {}),
               ...(isPast ? styles.iconPast : {}),
             }}>
-              {step.icon}
+              <img src={imgSrc} alt="" style={styles.iconImg} />
             </div>
             <span style={{
               ...styles.label,
@@ -46,7 +48,7 @@ const styles = {
     alignItems: 'flex-start',
     justifyContent: 'center',
     gap: 0,
-    padding: '12px 24px',
+    padding: '16px 24px 8px',
     flexShrink: 0,
   },
   step: {
@@ -60,25 +62,21 @@ const styles = {
   icon: {
     width: 44,
     height: 44,
-    borderRadius: '50%',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    fontSize: 18,
-    background: 'rgba(210, 205, 200, 0.4)',
-    color: '#B0ABA6',
     transition: 'all 0.3s',
   },
+  iconImg: {
+    width: 44,
+    height: 44,
+    objectFit: 'contain',
+    display: 'block',
+  },
   iconActive: {
-    background: 'linear-gradient(135deg, #F8CB7F 0%, #E8924E 100%)',
-    color: '#fff',
-    boxShadow: '0 3px 12px rgba(232, 146, 78, 0.4)',
     transform: 'scale(1.1)',
   },
-  iconPast: {
-    background: 'rgba(232, 146, 78, 0.2)',
-    color: '#E8924E',
-  },
+  iconPast: {},
   label: {
     fontSize: 11,
     fontWeight: 600,
@@ -88,8 +86,9 @@ const styles = {
   },
   labelActive: {
     color: '#2A2720',
+    fontWeight: 700,
   },
   labelPast: {
-    color: '#E8924E',
+    color: '#2A2720',
   },
 }

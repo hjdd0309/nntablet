@@ -269,7 +269,7 @@ export default function AskForHelpModal({ onClose }) {
                 </button>
 
                 {isListening ? (
-                  <button style={styles.stopBtn} onClick={stopListening}>■ 멈추기</button>
+                  <button style={styles.stopBtn} onClick={stopListening}>{t.stopListening}</button>
                 ) : (
                   <button
                     style={{ ...styles.translateBtn, ...(!ownerMicText.trim() || ownerMicLoading ? styles.translateBtnDisabled : {}) }}
@@ -332,7 +332,7 @@ export default function AskForHelpModal({ onClose }) {
 
               {isListening ? (
                 <button style={styles.stopBtn} onClick={stopListening}>
-                  ■ 멈추기
+                  {t.stopListening}
                 </button>
               ) : (
                 <button

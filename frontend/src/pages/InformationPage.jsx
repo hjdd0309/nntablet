@@ -12,7 +12,7 @@ export default function InformationPage() {
 
   return (
     <div style={styles.container}>
-      <div style={{ position: 'absolute', inset: 0, backgroundImage: 'url(/bg-white.png)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }} />
+      <div style={{ position: 'absolute', inset: 0, backgroundImage: 'url(/홈.png)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }} />
 
       <Header showBack backTo="/overview" showCall showHome />
 
@@ -23,8 +23,10 @@ export default function InformationPage() {
           {/* About Chilbo */}
           <div style={styles.card}>
             <h2 style={styles.cardTitle}>{t.aboutChilboTitle}</h2>
-            <div style={styles.imgPlaceholder} />
-            <p style={styles.desc}>{t.aboutChilboDesc}</p>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 12 }}>
+              <div style={styles.imgPlaceholder} />
+              <p style={styles.desc}>{t.aboutChilboDesc}</p>
+            </div>
           </div>
 
           {/* Choose your Design */}
@@ -32,16 +34,16 @@ export default function InformationPage() {
             <h2 style={styles.cardTitle}>{t.chooseYourDesignTitle}</h2>
             <p style={styles.desc}>{t.chooseDesignDesc}</p>
             <div style={styles.designRow}>
-              <button style={styles.designItem} onClick={() => navigate('/choose-design')}>
+              <div style={styles.designItem}>
                 <div style={styles.designIcon}>
                   <GatSvg />
                 </div>
                 <span style={styles.designLabel}>{t.koreanHatGat}</span>
-              </button>
-              <button style={styles.designItem} onClick={() => navigate('/choose-design')}>
+              </div>
+              <div style={styles.designItem}>
                 <div style={{...styles.designIcon, ...styles.designIconSquare}} />
                 <span style={styles.designLabel}>{t.square}</span>
-              </button>
+              </div>
             </div>
           </div>
 
@@ -162,12 +164,9 @@ const styles = {
   },
   imgPlaceholder: {
     width: '100%',
-    height: 100,
-    background: 'linear-gradient(45deg, #d4d0c8 25%, transparent 25%), linear-gradient(-45deg, #d4d0c8 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #d4d0c8 75%), linear-gradient(-45deg, transparent 75%, #d4d0c8 75%)',
-    backgroundSize: '20px 20px',
-    backgroundPosition: '0 0, 0 10px, 10px -10px, -10px 0px',
-    backgroundColor: '#e8e4dc',
-    borderRadius: 10,
+    height: 120,
+    background: 'linear-gradient(135deg, #F5E6CA 0%, #EDD4A8 60%, #E2C090 100%)',
+    borderRadius: 12,
     flexShrink: 0,
   },
   desc: {
@@ -201,8 +200,8 @@ const styles = {
   designIconSquare: {
     background: '#2A2720',
     borderRadius: 4,
-    width: 70,
-    height: 70,
+    width: 80,
+    height: 80,
   },
   designLabel: {
     fontSize: 13,
@@ -211,62 +210,76 @@ const styles = {
   },
   statsRow: {
     display: 'flex',
-    justifyContent: 'space-around',
+    justifyContent: 'space-evenly',
     alignItems: 'center',
-    height: '100%',
+    flex: 1,
   },
   statItem: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
   },
   statIcon: {
-    fontSize: 28,
+    fontSize: 30,
     color: '#F8CB7F',
     filter: 'drop-shadow(0 2px 4px rgba(232,146,78,0.4))',
   },
   statLabel: {
-    fontSize: 14,
-    fontWeight: 600,
-    color: '#2A2720',
+    fontSize: 13,
+    fontWeight: 700,
+    color: '#ADA9A4',
+    textTransform: 'uppercase',
+    letterSpacing: '0.05em',
   },
   statValue: {
-    fontSize: 14,
-    color: '#7A7570',
+    fontSize: 16,
+    fontWeight: 700,
+    color: '#2A2720',
   },
   progressRow: {
     display: 'flex',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     gap: 0,
     overflowX: 'auto',
+    msOverflowStyle: 'none',
+    scrollbarWidth: 'none',
+    flex: 1,
+    justifyContent: 'center',
   },
   progressItem: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    gap: 6,
+    gap: 10,
     position: 'relative',
-    minWidth: 60,
+    flex: 1,
+    minWidth: 56,
   },
   progressIcon: {
-    fontSize: 22,
+    fontSize: 26,
     color: '#E8924E',
+    width: 32,
+    height: 32,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
   },
   progressLine: {
     position: 'absolute',
-    top: 12,
-    left: '100%',
+    top: 16,
+    left: '50%',
     width: '100%',
     height: 2,
     background: '#E0DBD4',
-    transform: 'translateX(-50%)',
   },
   progressLabel: {
-    fontSize: 9,
+    fontSize: 12,
     color: '#7A7570',
     textAlign: 'center',
-    lineHeight: 1.3,
+    lineHeight: 1.4,
     whiteSpace: 'pre',
+    fontWeight: 600,
   },
 }

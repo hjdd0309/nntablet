@@ -14,16 +14,16 @@ export default function WorkshopOverview() {
       <div style={{
         position: 'absolute',
         inset: 0,
-        backgroundImage: 'url(/bg-white.png)',
+        backgroundImage: 'url(/홈.png)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
       }} />
       <Header showBack backTo="/state" showCall showHome />
+      <h1 style={styles.title}>{t.welcomeTitle}</h1>
       <StepProgress currentStep={0} />
 
       <div style={styles.content}>
-        <h1 style={styles.title}>{t.welcomeTitle}</h1>
 
         <div style={styles.grid}>
           {/* Large: Explore Gallery */}
@@ -80,7 +80,6 @@ export default function WorkshopOverview() {
           </div>
         </div>
       </div>
-
     </div>
   )
 }
@@ -89,7 +88,7 @@ const styles = {
   container: {
     width: '100%',
     height: '100%',
-    background: '#FAF8F2',
+    background: '#F5F2EA',
     display: 'flex',
     flexDirection: 'column',
     position: 'relative',
@@ -114,11 +113,13 @@ const styles = {
     overflow: 'hidden',
   },
   title: {
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: 700,
     color: '#2A2720',
     fontFamily: 'var(--font)',
     zIndex: 2,
+    textAlign: 'center',
+    padding: '20px 32px 0',
   },
   grid: {
     flex: 1,

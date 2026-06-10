@@ -15,7 +15,7 @@ export default function ProcessResultPage() {
 
   return (
     <div style={styles.container}>
-      <div style={{ position: 'absolute', inset: 0, backgroundImage: 'url(/bg-white.png)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }} />
+      <div style={{ position: 'absolute', inset: 0, backgroundImage: 'url(/7_기록.png)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }} />
       <Header showBack backTo="/completion" showCall showHome />
 
       <div style={styles.content}>

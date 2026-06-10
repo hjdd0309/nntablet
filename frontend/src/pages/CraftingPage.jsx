@@ -31,7 +31,7 @@ export default function CraftingPage() {
 
   return (
     <div style={styles.container}>
-      <div style={{ position: 'absolute', inset: 0, backgroundImage: 'url(/bg-white.png)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }} />
+      <div style={{ position: 'absolute', inset: 0, backgroundImage: 'url(/5_배경.png)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }} />
       <Header showBack backTo="/sketch" showCall showCamera showHome />
       <StepProgress currentStep={4} />
 
@@ -76,7 +76,7 @@ const styles = {
   container: {
     width: '100%',
     height: '100%',
-    background: '#FAF8F2',
+    background: '#F5F2EA',
     display: 'flex',
     flexDirection: 'column',
     position: 'relative',

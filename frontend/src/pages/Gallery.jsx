@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import Header from '../components/Header'
 import { supabase } from '../lib/supabase'
 import { useT } from '../i18n'
 
 export default function Gallery() {
   const navigate = useNavigate()
+  const location = useLocation()
   const t = useT()
+  const bgImage = location.state?.fromShare ? '/7_갤러리.png' : '/홈.png'
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [showMySaved, setShowMySaved] = useState(false)
@@ -63,7 +65,7 @@ export default function Gallery() {
 
   return (
     <div style={styles.container}>
-      <div style={{ position: 'absolute', inset: 0, backgroundImage: 'url(/bg-white.png)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }} />
+      <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(${bgImage})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }} />
       <Header showBack showCall showHome />
 
       <div style={styles.pageHeader}>
@@ -102,11 +104,11 @@ export default function Gallery() {
       <div style={styles.grid} onClick={() => setShowFilter(false)}>
         {loading ? (
           <div style={styles.loadingWrap}>
-            <span style={styles.loadingText}>불러오는 중...</span>
+            <span style={styles.loadingText}>{t.loading}</span>
           </div>
         ) : displayed.length === 0 ? (
           <div style={styles.loadingWrap}>
-            <span style={styles.loadingText}>등록된 작품이 없습니다.</span>
+            <span style={styles.loadingText}>{t.noArtworks}</span>
           </div>
         ) : displayed.map((item) => (
           <div key={item.id} style={styles.card}>

@@ -1,5 +1,7 @@
+import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { AppProvider, useApp } from './context/AppContext'
+import { supabase } from './lib/supabase'
 import AskForHelpModal from './components/modals/AskForHelpModal'
 import SplashScreen from './pages/SplashScreen'
 import LanguageSelect from './pages/LanguageSelect'
@@ -51,7 +53,35 @@ function AppRoutes() {
   )
 }
 
+async function cleanupExpiredSessions() {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+
+  const { data: sessions } = await supabase
+    .from('craft_sessions')
+    .select('session_token')
+    .lt('created_at', today.toISOString())
+
+  if (!sessions || sessions.length === 0) return
+
+  for (const { session_token } of sessions) {
+    const { data: files } = await supabase.storage.from('nntablet').list(session_token)
+    if (files && files.length > 0) {
+      const paths = files.map(f => `${session_token}/${f.name}`)
+      await supabase.storage.from('nntablet').remove(paths)
+    }
+  }
+
+  await supabase.from('craft_sessions')
+    .delete()
+    .lt('created_at', today.toISOString())
+}
+
 export default function App() {
+  useEffect(() => {
+    cleanupExpiredSessions().catch(() => {})
+  }, [])
+
   return (
     <AppProvider>
       <BrowserRouter>

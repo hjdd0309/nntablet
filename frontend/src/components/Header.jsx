@@ -64,13 +64,10 @@ export default function Header({ showBack = true, showHome = false, showCall = f
 
       <div style={styles.right}>
         <span style={styles.time}>{time}</span>
-        {showCamera && !recordMode && (
-          <button style={styles.iconBtn}>📷</button>
-        )}
         {recordMode && nextShotCountdown !== null && (
           <div style={styles.camTimer}>
             <span>📷</span>
-            <span style={styles.camTimerLabel}>다음 촬영까지</span>
+            <span style={styles.camTimerLabel}>{t.nextShotLabel}</span>
             <span style={styles.camTimerText}>{fmtCountdown(nextShotCountdown)}</span>
           </div>
         )}
@@ -90,16 +87,16 @@ const styles = {
   header: {
     position: 'relative',
     display: 'flex',
-    alignItems: 'flex-end',
+    alignItems: 'center',
     justifyContent: 'space-between',
     paddingLeft: 20,
     paddingRight: 20,
-    paddingTop: 'env(safe-area-inset-top)',
-    paddingBottom: 10,
-    height: 'calc(64px + env(safe-area-inset-top))',
-    background: 'rgba(250, 248, 242, 0.95)',
+    paddingTop: 0,
+    paddingBottom: 0,
+    height: 64,
+    background: 'rgba(250, 248, 242, 0.35)',
     backdropFilter: 'blur(8px)',
-    borderBottom: '1px solid rgba(0,0,0,0.06)',
+    borderBottom: '1px solid rgba(0,0,0,0.1)',
     flexShrink: 0,
     zIndex: 10,
     boxSizing: 'border-box',

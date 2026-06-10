@@ -23,13 +23,12 @@ export default function CompletionPage() {
 
   return (
     <div style={styles.container}>
-      <div style={{ position: 'absolute', inset: 0, backgroundImage: 'url(/bg-white.png)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }} />
+      <div style={{ position: 'absolute', inset: 0, backgroundImage: 'url(/7_배경.png)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }} />
       <Header showBack backTo="/package" showCall showHome />
+      <h1 style={styles.title}>{t.artworkComplete}</h1>
       <StepProgress currentStep={6} />
 
       <div style={styles.content}>
-        <h1 style={styles.title}>{t.artworkComplete}</h1>
-
         <div style={styles.cardRow}>
           {/* 주변 탐색 */}
           <button style={styles.card} onClick={() => navigate('/workshops', { state: { explore: true } })}>
@@ -73,7 +72,7 @@ const styles = {
   container: {
     width: '100%',
     height: '100%',
-    background: '#FAF8F2',
+    background: '#F5F2EA',
     display: 'flex',
     flexDirection: 'column',
     position: 'relative',
@@ -96,6 +95,9 @@ const styles = {
     color: '#2A2720',
     fontFamily: 'var(--font)',
     textAlign: 'center',
+    paddingTop: 20,
+    zIndex: 2,
+    position: 'relative',
     flexShrink: 0,
   },
   cardRow: {

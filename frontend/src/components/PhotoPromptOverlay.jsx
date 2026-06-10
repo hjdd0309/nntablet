@@ -3,20 +3,24 @@ import { useApp } from '../context/AppContext'
 import { supabase } from '../lib/supabase'
 
 export default function PhotoPromptOverlay() {
-  const { recordMode, showPhotoPrompt, sessionToken, addSessionPhoto, dismissPhotoPrompt } = useApp()
+  const { recordMode, captureType, showPhotoPrompt, sessionToken, addSessionPhoto, dismissPhotoPrompt } = useApp()
   const fileInputRef = useRef(null)
 
   if (!showPhotoPrompt) return null
+
+  const isTimelapse = captureType === 'timelapse'
 
   const handleFile = async (e) => {
     const file = e.target.files?.[0]
     if (!file || !sessionToken) { dismissPhotoPrompt(); return }
     try {
       const id = Math.random().toString(36).substring(2, 10)
-      const path = `${sessionToken}/shot_${Date.now()}_${id}.jpg`
+      const ext = file.type.split('/')[1] || (isTimelapse ? 'mp4' : 'jpg')
+      const prefix = isTimelapse ? 'timelapse' : 'shot'
+      const path = `${sessionToken}/${prefix}_${Date.now()}_${id}.${ext}`
       const { error } = await supabase.storage
         .from('nntablet')
-        .upload(path, file, { contentType: file.type || 'image/jpeg', upsert: true })
+        .upload(path, file, { contentType: file.type || (isTimelapse ? 'video/mp4' : 'image/jpeg'), upsert: true })
       if (error) throw error
       const { data: { publicUrl } } = supabase.storage.from('nntablet').getPublicUrl(path)
       const { data: session } = await supabase
@@ -35,18 +39,32 @@ export default function PhotoPromptOverlay() {
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/*"
+        accept={isTimelapse ? 'video/*' : 'image/*'}
         capture="environment"
         style={{ display: 'none' }}
         onChange={handleFile}
-        // reset value so the same file can trigger onChange again
         onClick={e => { e.target.value = '' }}
       />
 
       <div style={s.card}>
-        <span style={s.icon}>{recordMode === 'auto' ? '📷' : '🔔'}</span>
+        <span style={s.icon}>{isTimelapse ? '🎬' : (recordMode === 'auto' ? '📷' : '🔔')}</span>
 
-        {recordMode === 'auto' ? (
+        {isTimelapse ? (
+          <>
+            <p style={s.title}>영상 촬영 시간이에요!</p>
+            <p style={s.sub}>10초 정도 작업 모습을 담아주세요</p>
+            {recordMode === 'auto' ? (
+              <button style={s.btnPrimary} onClick={() => fileInputRef.current?.click()}>
+                지금 촬영하기
+              </button>
+            ) : (
+              <div style={s.btnRow}>
+                <button style={s.btnSecondary} onClick={dismissPhotoPrompt}>건너뛰기</button>
+                <button style={s.btnPrimary} onClick={() => fileInputRef.current?.click()}>촬영하기</button>
+              </div>
+            )}
+          </>
+        ) : recordMode === 'auto' ? (
           <>
             <p style={s.title}>촬영 시간이에요!</p>
             <p style={s.sub}>카메라가 열립니다</p>

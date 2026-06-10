@@ -9,12 +9,12 @@ export default function PackagePage() {
 
   return (
     <div style={styles.container}>
-      <div style={{ position: 'absolute', inset: 0, backgroundImage: 'url(/bg-white.png)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }} />
+      <div style={{ position: 'absolute', inset: 0, backgroundImage: 'url(/6_배경.png)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }} />
       <Header showBack backTo="/crafting" showCall showHome />
+      <h1 style={styles.title}>{t.stepSelectPackage}</h1>
       <StepProgress currentStep={5} />
 
       <div style={styles.content}>
-        <h1 style={styles.title}>{t.stepSelectPackage}</h1>
         <button style={styles.nextBtn} onClick={() => navigate('/completion')}>
           {t.stepCompletion} →
         </button>
@@ -27,7 +27,7 @@ const styles = {
   container: {
     width: '100%',
     height: '100%',
-    background: '#FAF8F2',
+    background: '#F5F2EA',
     display: 'flex',
     flexDirection: 'column',
     position: 'relative',
@@ -47,6 +47,10 @@ const styles = {
     fontWeight: 700,
     color: '#2A2720',
     fontFamily: 'var(--font)',
+    textAlign: 'center',
+    padding: '20px 32px 0',
+    zIndex: 2,
+    position: 'relative',
   },
   nextBtn: {
     padding: '16px 40px',

@@ -16,12 +16,12 @@ export default function ChooseDesign() {
 
   return (
     <div style={styles.container}>
-      <div style={{ position: 'absolute', inset: 0, backgroundImage: 'url(/bg-blue.png)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }} />
+      <div style={{ position: 'absolute', inset: 0, backgroundImage: 'url(/3_배경.png)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }} />
       <Header showBack backTo="/process-log" showCall showCamera showHome />
+      <h1 style={styles.title}>{t.chooseYourDesign}</h1>
       <StepProgress currentStep={2} />
 
       <div style={styles.content}>
-        <h1 style={styles.title}>{t.chooseYourDesign}</h1>
         <div style={styles.cardRow}>
           <button style={styles.card} onClick={() => handleSelect('gat')}>
             <span style={styles.arrow}>→</span>
@@ -53,7 +53,7 @@ const styles = {
   container: {
     width: '100%',
     height: '100%',
-    background: 'linear-gradient(160deg, #D8D4E8 0%, #C8C4DC 100%)',
+    background: '#F5F2EA',
     display: 'flex',
     flexDirection: 'column',
     position: 'relative',
@@ -80,6 +80,10 @@ const styles = {
     fontWeight: 700,
     color: '#2A2720',
     fontFamily: 'var(--font)',
+    textAlign: 'center',
+    padding: '20px 32px 0',
+    zIndex: 2,
+    position: 'relative',
   },
   cardRow: {
     display: 'flex',

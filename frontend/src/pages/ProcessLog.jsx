@@ -10,7 +10,7 @@ const generateToken = () => Math.random().toString(36).substring(2, 10)
 
 export default function ProcessLog() {
   const navigate = useNavigate()
-  const { setSessionToken, startRecording, recordMode, nextShotCountdown } = useApp()
+  const { setSessionToken, startRecording, stopRecording, recordMode, nextShotCountdown } = useApp()
 
   const fmtCountdown = (s) => {
     if (s === null) return ''
@@ -23,7 +23,7 @@ export default function ProcessLog() {
     // 타이머·토큰은 DB와 무관하게 즉시 시작
     const token = generateToken()
     setSessionToken(token)
-    startRecording(recMode)
+    startRecording(recMode, mode)
     navigate('/choose-design')
 
     // DB 저장은 백그라운드에서 시도
@@ -38,7 +38,7 @@ export default function ProcessLog() {
 
   return (
     <div style={styles.container}>
-      <div style={{ position: 'absolute', inset: 0, backgroundImage: 'url(/bg-white.png)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }} />
+      <div style={{ position: 'absolute', inset: 0, backgroundImage: 'url(/2_배경.png)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }} />
       <Header
         showBack
         onBack={mode !== null ? () => setMode(null) : undefined}
@@ -46,8 +46,8 @@ export default function ProcessLog() {
         showCall
         showHome
       />
-      <StepProgress currentStep={1} />
       <h1 style={styles.title}>{t.logYourCraft}</h1>
+      <StepProgress currentStep={1} />
 
       {/* 모드 선택 */}
       {mode === null && (
@@ -80,7 +80,7 @@ export default function ProcessLog() {
               {recordMode && nextShotCountdown !== null ? (
                 <div style={styles.timerInner}>
                   <span style={styles.timerCamIcon}>📷</span>
-                  <span style={styles.timerLabel}>다음 촬영까지</span>
+                  <span style={styles.timerLabel}>{t.nextShotLabel}</span>
                   <span style={styles.timerCountdown}>{fmtCountdown(nextShotCountdown)}</span>
                 </div>
               ) : null}
@@ -97,7 +97,7 @@ export default function ProcessLog() {
               <div style={styles.btnGroup}>
                 <button
                   style={styles.btnNo}
-                  onClick={() => navigate('/choose-design')}
+                  onClick={() => { stopRecording(); navigate('/choose-design') }}
                 >
                   {t.noThanks}
                 </button>
@@ -133,13 +133,15 @@ const styles = {
     overflow: 'hidden',
   },
   title: {
-    fontSize: 26,
+    fontSize: 32,
     fontWeight: 700,
     color: '#2A2720',
     fontFamily: 'var(--font)',
     textAlign: 'center',
+    paddingTop: 20,
     paddingBottom: 8,
     zIndex: 2,
+    position: 'relative',
     flexShrink: 0,
   },
   content: {

@@ -192,11 +192,10 @@ export default function SketchingPage() {
 
   return (
     <div style={styles.container}>
-      <div style={{ position: 'absolute', inset: 0, backgroundImage: 'url(/bg-blue.png)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }} />
+      <div style={{ position: 'absolute', inset: 0, backgroundImage: 'url(/4_배경.png)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }} />
       <Header showBack backTo="/choose-design" showCall showHome />
-      <StepProgress currentStep={3} />
-
       <h1 style={styles.title}>{t.prepareYourDesign}</h1>
+      <StepProgress currentStep={3} />
 
       <div style={styles.workspace}>
         {/* Left tools */}
@@ -297,20 +296,22 @@ const styles = {
   container: {
     width: '100%',
     height: '100%',
-    background: 'transparent',
+    background: '#F5F2EA',
     display: 'flex',
     flexDirection: 'column',
     position: 'relative',
     overflow: 'hidden',
   },
   title: {
-    fontSize: 26,
+    fontSize: 32,
     fontWeight: 700,
     color: '#2A2720',
     fontFamily: 'var(--font)',
     textAlign: 'center',
+    paddingTop: 20,
     paddingBottom: 8,
     zIndex: 2,
+    position: 'relative',
     flexShrink: 0,
   },
   workspace: {
@@ -328,7 +329,7 @@ const styles = {
     flexDirection: 'column',
     gap: 8,
     padding: '12px 8px',
-    background: 'rgba(255,255,255,0.75)',
+    background: 'rgba(255,255,255,0.35)',
     backdropFilter: 'blur(8px)',
     borderRadius: 16,
     alignItems: 'center',
@@ -355,8 +356,8 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     padding: '0 12px',
-    background: 'rgba(255,255,255,0.5)',
-    backdropFilter: 'blur(4px)',
+    background: 'rgba(255,255,255,0.35)',
+    backdropFilter: 'blur(8px)',
     margin: '0 12px',
     borderRadius: 16,
     overflow: 'hidden',
@@ -424,7 +425,7 @@ const styles = {
   },
   modal: {
     width: 760,
-    background: 'linear-gradient(160deg, #EEF0F8 0%, #DDE0F0 100%)',
+    background: 'url(/디자인확인.png) center/cover no-repeat',
     borderRadius: 28,
     padding: '28px 36px 32px',
     display: 'flex',

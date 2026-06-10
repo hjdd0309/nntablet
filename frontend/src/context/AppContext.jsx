@@ -18,6 +18,7 @@ export function AppProvider({ children }) {
   const [showPhotoPrompt, setShowPhotoPrompt] = useState(false)
   const [nextShotCountdown, setNextShotCountdown] = useState(null) // 초
   const [sessionPhotos, setSessionPhotos] = useState([])
+  const [captureType, setCaptureType] = useState(null) // 'timelapse' | 'photos'
 
   // 1초마다 카운트다운
   useEffect(() => {
@@ -30,8 +31,9 @@ export function AppProvider({ children }) {
     return () => clearTimeout(timer)
   }, [recordMode, showPhotoPrompt, nextShotCountdown])
 
-  const startRecording = useCallback((mode) => {
+  const startRecording = useCallback((mode, type) => {
     setRecordMode(mode)
+    setCaptureType(type)
     setNextShotCountdown(SHOT_INTERVAL_SECS)
     setShowPhotoPrompt(false)
     setSessionPhotos([])
@@ -39,6 +41,7 @@ export function AppProvider({ children }) {
 
   const stopRecording = useCallback(() => {
     setRecordMode(null)
+    setCaptureType(null)
     setNextShotCountdown(null)
     setShowPhotoPrompt(false)
   }, [])
@@ -46,6 +49,7 @@ export function AppProvider({ children }) {
   const resetSession = useCallback(() => {
     setSessionToken(null)
     setRecordMode(null)
+    setCaptureType(null)
     setNextShotCountdown(null)
     setShowPhotoPrompt(false)
     setSessionPhotos([])
@@ -76,6 +80,7 @@ export function AppProvider({ children }) {
       showHelpModal, setShowHelpModal,
       sessionToken, setSessionToken,
       recordMode,
+      captureType,
       showPhotoPrompt,
       nextShotCountdown,
       sessionPhotos,

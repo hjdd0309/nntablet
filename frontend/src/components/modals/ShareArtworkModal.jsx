@@ -167,7 +167,7 @@ export default function ShareArtworkModal({ onClose }) {
             <p style={m.stateSub}>갤러리에서 내 작품을 확인해보세요</p>
             <div style={m.btnRow}>
               <button style={m.btnSecondary} onClick={onClose}>닫기</button>
-              <button style={m.btnPrimary} onClick={() => { onClose(); navigate('/gallery') }}>
+              <button style={m.btnPrimary} onClick={() => { onClose(); navigate('/gallery', { state: { fromShare: true } }) }}>
                 갤러리 보기 →
               </button>
             </div>
@@ -192,7 +192,7 @@ const m = {
   },
   modal: {
     width: 760,
-    background: 'url(/Contact_popup.png) center/cover no-repeat',
+    background: 'url(/7_갤러리.png) center/cover no-repeat',
     borderRadius: 28,
     padding: '28px 36px 32px',
     display: 'flex',
