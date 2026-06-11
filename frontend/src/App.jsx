@@ -17,6 +17,7 @@ import PackagePage from './pages/PackagePage'
 import CompletionPage from './pages/CompletionPage'
 import Gallery from './pages/Gallery'
 import WhatIsChilboPage from './pages/WhatIsChilboPage'
+import FrameSelectPage from './pages/FrameSelectPage'
 import SessionView from './pages/SessionView'
 import ProcessResultPage from './pages/ProcessResultPage'
 import PhotoPromptOverlay from './components/PhotoPromptOverlay'
@@ -44,6 +45,7 @@ function AppRoutes() {
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/what-is-chilbo" element={<WhatIsChilboPage />} />
           <Route path="/view/:token" element={<SessionView />} />
+          <Route path="/frame-select" element={<FrameSelectPage />} />
           <Route path="/process-result" element={<ProcessResultPage />} />
         </Routes>
       </div>

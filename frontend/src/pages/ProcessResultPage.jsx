@@ -6,11 +6,11 @@ import { useT } from '../i18n'
 
 export default function ProcessResultPage() {
   const navigate = useNavigate()
-  const { sessionToken } = useApp()
+  const { sessionToken, selectedFrame } = useApp()
   const t = useT()
 
   const qrUrl = sessionToken
-    ? `${window.location.origin}/view/${sessionToken}`
+    ? `${window.location.origin}/view/${sessionToken}${selectedFrame ? `?frame=${selectedFrame}` : ''}`
     : null
 
   return (

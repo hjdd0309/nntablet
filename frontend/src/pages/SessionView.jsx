@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import logo from '../assets/로고.png'
 
@@ -22,6 +22,8 @@ async function saveImage(url, filename = 'nanyeong-photo.jpg') {
 
 export default function SessionView() {
   const { token } = useParams()
+  const [searchParams] = useSearchParams()
+  const frameId = searchParams.get('frame')
   const [session, setSession] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -73,6 +75,7 @@ export default function SessionView() {
         {urls.map((url, i) => (
           <div key={i} style={v.imgWrap}>
             <img src={url} alt={`photo ${i + 1}`} style={v.img} onClick={() => setSelected(url)} />
+            {frameId && <img src={`/프레임${frameId}.png`} alt="" style={v.frameOverlay} />}
             <button style={v.saveBtn} onClick={() => saveImage(url, `nanyeong-${i + 1}.jpg`)}>
               ↓ 저장
             </button>
@@ -82,7 +85,10 @@ export default function SessionView() {
 
       {selected && (
         <div style={v.overlay} onClick={() => setSelected(null)}>
-          <img src={selected} alt="" style={v.fullImg} onClick={e => e.stopPropagation()} />
+          <div style={v.fullImgWrap} onClick={e => e.stopPropagation()}>
+            <img src={selected} alt="" style={v.fullImg} />
+            {frameId && <img src={`/프레임${frameId}.png`} alt="" style={v.frameOverlayFull} />}
+          </div>
           <button
             style={v.fullSaveBtn}
             onClick={e => { e.stopPropagation(); saveImage(selected) }}
@@ -175,24 +181,50 @@ const v = {
     fontFamily: "'Nunito', sans-serif",
     boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
   },
+  frameOverlay: {
+    position: 'absolute',
+    inset: 0,
+    width: '100%',
+    height: '100%',
+    objectFit: 'fill',
+    pointerEvents: 'none',
+  },
   overlay: {
     position: 'fixed',
     inset: 0,
     background: 'rgba(0,0,0,0.85)',
     display: 'flex',
+    flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 999,
     padding: 20,
+    gap: 16,
+  },
+  fullImgWrap: {
+    position: 'relative',
+    maxWidth: '100%',
+    maxHeight: '85vh',
+    borderRadius: 12,
+    overflow: 'hidden',
+    flexShrink: 0,
   },
   fullImg: {
+    display: 'block',
     maxWidth: '100%',
-    maxHeight: '85%',
+    maxHeight: '85vh',
     borderRadius: 12,
     objectFit: 'contain',
   },
+  frameOverlayFull: {
+    position: 'absolute',
+    inset: 0,
+    width: '100%',
+    height: '100%',
+    objectFit: 'fill',
+    pointerEvents: 'none',
+  },
   fullSaveBtn: {
-    marginTop: 16,
     padding: '14px 48px',
     borderRadius: 30,
     background: 'linear-gradient(135deg, #F8CB7F 0%, #E8924E 100%)',

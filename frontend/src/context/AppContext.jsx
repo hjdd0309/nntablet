@@ -18,6 +18,7 @@ export function AppProvider({ children }) {
   const [showPhotoPrompt, setShowPhotoPrompt] = useState(false)
   const [nextShotCountdown, setNextShotCountdown] = useState(null) // 초
   const [sessionPhotos, setSessionPhotos] = useState([])
+  const [selectedFrame, setSelectedFrame] = useState(null) // 1-5
   // 1초마다 카운트다운
   useEffect(() => {
     if (!recordMode || showPhotoPrompt || nextShotCountdown === null) return
@@ -48,6 +49,7 @@ export function AppProvider({ children }) {
     setNextShotCountdown(null)
     setShowPhotoPrompt(false)
     setSessionPhotos([])
+    setSelectedFrame(null)
     setSelectedDesign(null)
     setSelectedWorkshop(null)
     setSketchColor(null)
@@ -74,6 +76,7 @@ export function AppProvider({ children }) {
       currentStep, setCurrentStep,
       showHelpModal, setShowHelpModal,
       sessionToken, setSessionToken,
+      selectedFrame, setSelectedFrame,
       recordMode,
       showPhotoPrompt,
       nextShotCountdown,

@@ -49,7 +49,7 @@ export default function CompletionPage() {
           </button>
 
           {/* 제작 과정 보기 */}
-          <button style={styles.card} onClick={() => navigate('/process-result')}>
+          <button style={styles.card} onClick={() => navigate('/frame-select')}>
             <span style={styles.arrow}>→</span>
             <div style={styles.cardBottom}>
               <span style={styles.cardIcon}>🎬</span>
