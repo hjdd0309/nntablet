@@ -17,7 +17,7 @@ export default function CraftingPage() {
   const t = useT()
   const [craftStep, setCraftStep] = useState(1)
   const [selectedColor, setSelectedColor] = useState(null)
-  const totalSteps = 8
+  const totalSteps = 7
 
   const handleNext = () => {
     if (craftStep < totalSteps) {
@@ -25,6 +25,10 @@ export default function CraftingPage() {
     } else {
       navigate('/package')
     }
+  }
+
+  const handlePrev = () => {
+    setCraftStep(s => s - 1)
   }
 
   const isColorStep = craftStep === 2
@@ -63,6 +67,11 @@ export default function CraftingPage() {
             </div>
           ) : null}
 
+          {craftStep >= 2 && (
+            <button style={styles.prevBtn} onClick={handlePrev}>
+              ←
+            </button>
+          )}
           <button style={styles.nextBtn} onClick={handleNext}>
             →
           </button>
@@ -164,6 +173,24 @@ const styles = {
     position: 'absolute',
     bottom: 20,
     right: 24,
+    width: 52,
+    height: 52,
+    borderRadius: '50%',
+    border: '1.5px solid #2A2720',
+    background: 'rgba(255,255,255,0.8)',
+    fontSize: 22,
+    color: '#2A2720',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontWeight: 700,
+    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+  },
+  prevBtn: {
+    position: 'absolute',
+    bottom: 20,
+    left: 24,
     width: 52,
     height: 52,
     borderRadius: '50%',

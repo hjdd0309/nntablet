@@ -1,82 +1,66 @@
-import { useState, useRef, useEffect } from 'react'
+import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Header from '../components/Header'
+import StepProgress from '../components/StepProgress'
+import { useT } from '../i18n'
+
+const VIDEO_SRC = '/chilbo.mp4'
 
 export default function VideoPlayer() {
   const navigate = useNavigate()
-  const [isPlaying, setIsPlaying] = useState(false)
-  const [progress, setProgress] = useState(32)
-  const [duration] = useState(90)
-  const intervalRef = useRef(null)
+  const t = useT()
+  const videoRef = useRef(null)
+  const [playing, setPlaying] = useState(false)
+  const [error, setError] = useState(false)
+  const [ended, setEnded] = useState(false)
 
-  useEffect(() => {
-    if (isPlaying) {
-      intervalRef.current = setInterval(() => {
-        setProgress(p => {
-          if (p >= duration) {
-            setIsPlaying(false)
-            return duration
-          }
-          return p + 1
-        })
-      }, 1000)
-    } else {
-      clearInterval(intervalRef.current)
-    }
-    return () => clearInterval(intervalRef.current)
-  }, [isPlaying, duration])
-
-  const fmtTime = (s) => {
-    const m = Math.floor(s / 60).toString().padStart(2, '0')
-    const sec = (s % 60).toString().padStart(2, '0')
-    return `${m}:${sec}`
-  }
-
-  const handleSeek = (e) => {
-    const bar = e.currentTarget
-    const rect = bar.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const ratio = Math.max(0, Math.min(1, x / rect.width))
-    setProgress(Math.round(ratio * duration))
+  const toggle = () => {
+    const v = videoRef.current
+    if (!v) return
+    if (v.paused) { v.play(); setPlaying(true) }
+    else { v.pause(); setPlaying(false) }
   }
 
   return (
     <div style={styles.container}>
-      <Header showBack showCall showHome />
+      <div style={{ position: 'absolute', inset: 0, backgroundImage: 'url(/2_배경.png)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }} />
+      <Header showBack backTo="/process-log" showCall showHome />
+      <h1 style={styles.title}>{t.stepChilboVideo}</h1>
+      <StepProgress currentStep={2} />
 
-      {/* Video area */}
-      <div style={styles.videoArea} onClick={() => setIsPlaying(v => !v)}>
-        <div style={{...styles.videoBg, ...styles.checkered}} />
-
-        {/* Play/Pause overlay */}
-        <button
-          style={{...styles.playBtn, ...(isPlaying ? styles.playBtnHidden : styles.playBtnVisible)}}
-          onClick={(e) => { e.stopPropagation(); setIsPlaying(v => !v) }}
-        >
-          <span style={styles.playIcon}>{isPlaying ? '⏸' : '▶'}</span>
-        </button>
-
-        {/* Controls bar */}
-        <div style={styles.controls} onClick={(e) => e.stopPropagation()}>
-          <button style={styles.ctrlBtn} onClick={() => setIsPlaying(v => !v)}>
-            {isPlaying ? '⏸' : '▶'}
-          </button>
-          <button style={styles.ctrlBtn}>🔊</button>
-          <span style={styles.timeDisplay}>
-            {fmtTime(progress)} / {fmtTime(duration)}
-          </span>
-
-          {/* Progress bar */}
-          <div style={styles.progressWrap} onClick={handleSeek}>
-            <div style={styles.progressBg} />
-            <div style={{...styles.progressFill, width: `${(progress / duration) * 100}%`}} />
-            <div style={{...styles.progressThumb, left: `calc(${(progress / duration) * 100}% - 8px)`}} />
-          </div>
-
-          <button style={styles.ctrlBtn}>⊟</button>
-          <button style={styles.ctrlBtn}>⚙</button>
-          <button style={styles.ctrlBtn}>⛶</button>
+      <div style={styles.content}>
+        <div style={styles.videoCard}>
+          {error ? (
+            <div style={styles.placeholder}>
+              <span style={styles.placeholderIcon}>🎬</span>
+              <p style={styles.placeholderText}>{t.chilboVideoPlaceholder}</p>
+            </div>
+          ) : (
+            <div style={styles.videoWrap} onClick={toggle}>
+              <video
+                ref={videoRef}
+                src={VIDEO_SRC}
+                style={styles.video}
+                playsInline
+                onError={() => setError(true)}
+                onEnded={() => { setPlaying(false); setEnded(true) }}
+                onPlay={() => setPlaying(true)}
+                onPause={() => setPlaying(false)}
+              />
+              {!playing && (
+                <div style={styles.playOverlay}>
+                  <div style={styles.playBtn}>
+                    <span style={styles.playIcon}>{ended ? '↺' : '▶'}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
+
+        <button style={styles.nextBtn} onClick={() => navigate('/gallery', { state: { fromFlow: true } })}>
+          {t.exploreToGallery} →
+        </button>
       </div>
     </div>
   )
@@ -86,116 +70,112 @@ const styles = {
   container: {
     width: '100%',
     height: '100%',
-    background: '#F2EFE8',
     display: 'flex',
     flexDirection: 'column',
+    position: 'relative',
+    overflow: 'hidden',
+    background: '#F5F2EA',
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: 700,
+    color: '#2A2720',
+    fontFamily: 'var(--font)',
+    textAlign: 'center',
+    paddingTop: 20,
+    paddingBottom: 8,
+    zIndex: 2,
+    position: 'relative',
+    flexShrink: 0,
+  },
+  content: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '0 60px 24px',
+    gap: 20,
+    zIndex: 2,
     overflow: 'hidden',
   },
-  videoArea: {
-    flex: 1,
+  videoCard: {
+    width: '100%',
+    maxWidth: 860,
+    borderRadius: 24,
+    overflow: 'hidden',
+    boxShadow: '0 4px 32px rgba(0,0,0,0.12)',
+    background: '#1a1814',
+    aspectRatio: '16 / 9',
+    flexShrink: 0,
+  },
+  videoWrap: {
+    width: '100%',
+    height: '100%',
     position: 'relative',
     cursor: 'pointer',
-    overflow: 'hidden',
-  },
-  videoBg: {
-    position: 'absolute',
-    inset: 0,
-  },
-  checkered: {
-    backgroundImage: 'linear-gradient(45deg, #d4d0c8 25%, transparent 25%), linear-gradient(-45deg, #d4d0c8 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #d4d0c8 75%), linear-gradient(-45deg, transparent 75%, #d4d0c8 75%)',
-    backgroundSize: '28px 28px',
-    backgroundPosition: '0 0, 0 14px, 14px -14px, -14px 0px',
-    backgroundColor: '#e8e4dc',
-  },
-  playBtn: {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    width: 80,
-    height: 80,
-    borderRadius: '50%',
-    background: 'rgba(100, 95, 90, 0.7)',
-    border: 'none',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    cursor: 'pointer',
-    zIndex: 5,
   },
-  playBtnVisible: {
-    opacity: 1,
+  video: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'contain',
+    display: 'block',
   },
-  playBtnHidden: {
-    opacity: 0,
-    pointerEvents: 'none',
+  playOverlay: {
+    position: 'absolute',
+    inset: 0,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: 'rgba(0,0,0,0.25)',
+  },
+  playBtn: {
+    width: 72,
+    height: 72,
+    borderRadius: '50%',
+    background: 'rgba(255,255,255,0.88)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
   },
   playIcon: {
     fontSize: 28,
-    color: '#fff',
+    color: '#2A2720',
     marginLeft: 4,
   },
-  controls: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    background: 'rgba(240,236,228,0.92)',
-    backdropFilter: 'blur(8px)',
-    padding: '12px 20px',
+  placeholder: {
+    width: '100%',
+    height: '100%',
     display: 'flex',
+    flexDirection: 'column',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: 12,
-    zIndex: 10,
+    background: 'rgba(255,255,255,0.1)',
   },
-  ctrlBtn: {
-    background: 'none',
+  placeholderIcon: {
+    fontSize: 52,
+  },
+  placeholderText: {
+    fontSize: 15,
+    color: 'rgba(255,255,255,0.6)',
+    fontFamily: 'var(--font)',
+    textAlign: 'center',
+  },
+  nextBtn: {
+    padding: '14px 36px',
+    borderRadius: 30,
+    background: 'linear-gradient(135deg, #F8CB7F 0%, #E8924E 100%)',
     border: 'none',
-    fontSize: 18,
-    cursor: 'pointer',
+    fontSize: 16,
+    fontWeight: 700,
     color: '#2A2720',
-    padding: '2px 4px',
-    flexShrink: 0,
-  },
-  timeDisplay: {
-    fontSize: 14,
-    fontWeight: 600,
-    color: '#2A2720',
-    whiteSpace: 'nowrap',
-    flexShrink: 0,
-  },
-  progressWrap: {
-    flex: 1,
-    height: 20,
-    display: 'flex',
-    alignItems: 'center',
-    position: 'relative',
     cursor: 'pointer',
-  },
-  progressBg: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    height: 4,
-    background: 'rgba(0,0,0,0.15)',
-    borderRadius: 2,
-  },
-  progressFill: {
-    position: 'absolute',
-    left: 0,
-    height: 4,
-    background: '#2A2720',
-    borderRadius: 2,
-    transition: 'width 0.3s linear',
-  },
-  progressThumb: {
-    position: 'absolute',
-    top: '50%',
-    transform: 'translateY(-50%)',
-    width: 16,
-    height: 16,
-    borderRadius: '50%',
-    background: '#2A2720',
-    transition: 'left 0.3s linear',
+    fontFamily: 'var(--font)',
+    flexShrink: 0,
   },
 }

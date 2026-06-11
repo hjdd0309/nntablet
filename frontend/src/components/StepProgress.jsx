@@ -5,8 +5,8 @@ export default function StepProgress({ currentStep = 0 }) {
   const STEPS = [
     { labelKey: 'stepOverview' },
     { labelKey: 'stepProcessLog' },
-    { labelKey: 'stepChooseDesign' },
-    { labelKey: 'stepSketching' },
+    { labelKey: 'stepChilboVideo' },
+    { labelKey: 'stepGallery' },
     { labelKey: 'stepHandcrafting' },
     { labelKey: 'stepSelectPackage' },
     { labelKey: 'stepCompletion' },

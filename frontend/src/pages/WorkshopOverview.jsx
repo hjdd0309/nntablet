@@ -26,8 +26,18 @@ export default function WorkshopOverview() {
       <div style={styles.content}>
 
         <div style={styles.grid}>
-          {/* Large: Explore Gallery */}
-          <button style={{...styles.card, ...styles.cardLarge}} onClick={() => navigate('/gallery')}>
+          {/* Left tall: What is Chilbo (spans both rows) */}
+          <button style={{...styles.card, gridColumn: '1', gridRow: '1 / 3'}} onClick={() => navigate('/what-is-chilbo')}>
+            <span style={styles.cardArrow}>→</span>
+            <div style={styles.cardMeta}>
+              <span style={styles.cardMetaIcon}>❓</span>
+              <span style={styles.cardMetaLabel}>{t.chilboMeta}</span>
+            </div>
+            <span style={styles.cardTitle}>{t.whatIsChilbo}</span>
+          </button>
+
+          {/* Top-right wide: Explore Gallery */}
+          <button style={{...styles.card, gridColumn: '2 / 5', gridRow: '1'}} onClick={() => navigate('/gallery')}>
             <span style={styles.cardArrow}>→</span>
             <div style={styles.cardMeta}>
               <span style={styles.cardMetaIcon}>🖼</span>
@@ -36,48 +46,33 @@ export default function WorkshopOverview() {
             <span style={styles.cardTitle}>{t.exploreToGallery}</span>
           </button>
 
-          {/* Right column */}
-          <div style={styles.rightCol}>
-            {/* What is Chilbo */}
-            <button style={styles.card} onClick={() => navigate('/video')}>
-              <span style={styles.cardArrow}>→</span>
-              <div style={styles.cardMeta}>
-                <span style={styles.cardMetaIcon}>❓</span>
-                <span style={styles.cardMetaLabel}>{t.chilboMeta}</span>
-              </div>
-              <span style={styles.cardTitle}>{t.whatIsChilbo}</span>
-            </button>
+          {/* Bottom-right: 3 cards */}
+          <button style={{...styles.card, gridColumn: '2', gridRow: '2'}} onClick={() => navigate('/info')}>
+            <span style={styles.cardArrow}>→</span>
+            <div style={styles.cardMeta}>
+              <span style={styles.cardMetaIcon}>ℹ</span>
+              <span style={styles.cardMetaLabel}>{t.priceMeta}</span>
+            </div>
+            <span style={styles.cardTitle}>{t.aboutChilbo}</span>
+          </button>
 
-            {/* About Chilbo */}
-            <button style={styles.card} onClick={() => navigate('/info')}>
-              <span style={styles.cardArrow}>→</span>
-              <div style={styles.cardMeta}>
-                <span style={styles.cardMetaIcon}>ℹ</span>
-                <span style={styles.cardMetaLabel}>{t.priceMeta}</span>
-              </div>
-              <span style={styles.cardTitle}>{t.aboutChilbo}</span>
-            </button>
+          <button style={{...styles.card, gridColumn: '3', gridRow: '2'}} onClick={() => setShowHelpModal(true)}>
+            <span style={styles.cardArrow}>→</span>
+            <div style={styles.cardMeta}>
+              <span style={styles.cardMetaIcon}>🤚</span>
+              <span style={styles.cardMetaLabel}>{t.chilboMeta}</span>
+            </div>
+            <span style={styles.cardTitle}>{t.askForHelp}</span>
+          </button>
 
-            {/* Ask for Help */}
-            <button style={styles.card} onClick={() => setShowHelpModal(true)}>
-              <span style={styles.cardArrow}>→</span>
-              <div style={styles.cardMeta}>
-                <span style={styles.cardMetaIcon}>🤚</span>
-                <span style={styles.cardMetaLabel}>{t.chilboMeta}</span>
-              </div>
-              <span style={styles.cardTitle}>{t.askForHelp}</span>
-            </button>
-
-            {/* Ready to Enjoy */}
-            <button style={{...styles.card, ...styles.cardHighlight}} onClick={() => navigate('/process-log')}>
-              <span style={styles.cardArrow}>→</span>
-              <div style={styles.cardMeta}>
-                <span style={styles.cardMetaIcon}>🎊</span>
-                <span style={styles.cardMetaLabel}>{t.chilboMeta}</span>
-              </div>
-              <span style={styles.cardTitle}>{t.readyToEnjoyBtn}</span>
-            </button>
-          </div>
+          <button style={{...styles.card, ...styles.cardHighlight, gridColumn: '4', gridRow: '2'}} onClick={() => navigate('/process-log')}>
+            <span style={styles.cardArrow}>→</span>
+            <div style={styles.cardMeta}>
+              <span style={styles.cardMetaIcon}>🎊</span>
+              <span style={styles.cardMetaLabel}>{t.chilboMeta}</span>
+            </div>
+            <span style={styles.cardTitle}>{t.readyToEnjoyBtn}</span>
+          </button>
         </div>
       </div>
     </div>
@@ -124,14 +119,10 @@ const styles = {
   grid: {
     flex: 1,
     display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
+    gridTemplateColumns: 'repeat(4, 1fr)',
+    gridTemplateRows: '1fr 1fr',
     gap: 16,
     overflow: 'hidden',
-  },
-  rightCol: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    gap: 16,
   },
   card: {
     background: 'rgba(255,255,255,0.5)',
@@ -159,14 +150,14 @@ const styles = {
   },
   cardArrow: {
     alignSelf: 'flex-end',
-    width: 36,
-    height: 36,
+    width: 44,
+    height: 44,
     borderRadius: '50%',
     border: '1.5px solid rgba(42,39,32,0.6)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    fontSize: 16,
+    fontSize: 20,
     marginBottom: 'auto',
   },
   cardMeta: {
@@ -177,15 +168,15 @@ const styles = {
     paddingTop: 12,
   },
   cardMetaIcon: {
-    fontSize: 12,
+    fontSize: 14,
   },
   cardMetaLabel: {
-    fontSize: 10,
+    fontSize: 13,
     color: '#7A7570',
     fontWeight: 600,
   },
   cardTitle: {
-    fontSize: 17,
+    fontSize: 22,
     fontWeight: 700,
     color: '#2A2720',
     marginTop: 4,

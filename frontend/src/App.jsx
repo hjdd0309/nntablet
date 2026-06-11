@@ -16,7 +16,7 @@ import CraftingPage from './pages/CraftingPage'
 import PackagePage from './pages/PackagePage'
 import CompletionPage from './pages/CompletionPage'
 import Gallery from './pages/Gallery'
-import VideoPlayer from './pages/VideoPlayer'
+import WhatIsChilboPage from './pages/WhatIsChilboPage'
 import SessionView from './pages/SessionView'
 import ProcessResultPage from './pages/ProcessResultPage'
 import PhotoPromptOverlay from './components/PhotoPromptOverlay'
@@ -42,7 +42,7 @@ function AppRoutes() {
           <Route path="/package" element={<PackagePage />} />
           <Route path="/completion" element={<CompletionPage />} />
           <Route path="/gallery" element={<Gallery />} />
-          <Route path="/video" element={<VideoPlayer />} />
+          <Route path="/what-is-chilbo" element={<WhatIsChilboPage />} />
           <Route path="/view/:token" element={<SessionView />} />
           <Route path="/process-result" element={<ProcessResultPage />} />
         </Routes>

@@ -1,88 +1,173 @@
-import { useRef } from 'react'
+import { useRef, useState, useEffect, useCallback } from 'react'
 import { useApp } from '../context/AppContext'
 import { supabase } from '../lib/supabase'
 
 export default function PhotoPromptOverlay() {
-  const { recordMode, captureType, showPhotoPrompt, sessionToken, addSessionPhoto, dismissPhotoPrompt } = useApp()
-  const fileInputRef = useRef(null)
+  const { recordMode, showPhotoPrompt, sessionToken, addSessionPhoto, dismissPhotoPrompt } = useApp()
 
-  if (!showPhotoPrompt) return null
+  const [cameraOpen, setCameraOpen] = useState(false)
+  const [captured, setCaptured] = useState(null) // { url, blob } after snapshot
+  const [uploading, setUploading] = useState(false)
+  const [camError, setCamError] = useState(false)
 
-  const isTimelapse = captureType === 'timelapse'
+  const videoRef = useRef(null)
+  const canvasRef = useRef(null)
+  const streamRef = useRef(null)
 
-  const handleFile = async (e) => {
-    const file = e.target.files?.[0]
-    if (!file || !sessionToken) { dismissPhotoPrompt(); return }
+  const stopStream = useCallback(() => {
+    streamRef.current?.getTracks().forEach(t => t.stop())
+    streamRef.current = null
+  }, [])
+
+  const openCamera = async () => {
+    setCamError(false)
+    setCaptured(null)
+    setCameraOpen(true)
     try {
-      const id = Math.random().toString(36).substring(2, 10)
-      const ext = file.type.split('/')[1] || (isTimelapse ? 'mp4' : 'jpg')
-      const prefix = isTimelapse ? 'timelapse' : 'shot'
-      const path = `${sessionToken}/${prefix}_${Date.now()}_${id}.${ext}`
-      const { error } = await supabase.storage
-        .from('nntablet')
-        .upload(path, file, { contentType: file.type || (isTimelapse ? 'video/mp4' : 'image/jpeg'), upsert: true })
-      if (error) throw error
-      const { data: { publicUrl } } = supabase.storage.from('nntablet').getPublicUrl(path)
-      const { data: session } = await supabase
-        .from('craft_sessions').select('media_urls').eq('session_token', sessionToken).single()
-      await supabase.from('craft_sessions')
-        .update({ media_urls: [...(session?.media_urls || []), publicUrl] })
-        .eq('session_token', sessionToken)
-      addSessionPhoto(publicUrl)
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } },
+        audio: false,
+      })
+      streamRef.current = stream
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream
+        videoRef.current.play()
+      }
     } catch {
-      dismissPhotoPrompt()
+      setCamError(true)
     }
   }
 
+  const takeSnapshot = () => {
+    const video = videoRef.current
+    const canvas = canvasRef.current
+    if (!video || !canvas) return
+    canvas.width = video.videoWidth || 1280
+    canvas.height = video.videoHeight || 720
+    canvas.getContext('2d').drawImage(video, 0, 0)
+    canvas.toBlob(blob => {
+      if (!blob) return
+      stopStream()
+      setCaptured({ url: URL.createObjectURL(blob), blob })
+    }, 'image/jpeg', 0.92)
+  }
+
+  const retake = async () => {
+    if (captured) { URL.revokeObjectURL(captured.url); setCaptured(null) }
+    await openCamera()
+  }
+
+  const closeCamera = () => {
+    stopStream()
+    if (captured) { URL.revokeObjectURL(captured.url) }
+    setCaptured(null)
+    setCameraOpen(false)
+  }
+
+  const confirmPhoto = async () => {
+    if (!captured) return
+    setUploading(true)
+    try {
+      const id = Math.random().toString(36).substring(2, 10)
+      const path = sessionToken
+        ? `${sessionToken}/shot_${Date.now()}_${id}.jpg`
+        : `anon/shot_${Date.now()}_${id}.jpg`
+      const { error } = await supabase.storage
+        .from('nntablet')
+        .upload(path, captured.blob, { contentType: 'image/jpeg', upsert: true })
+      if (error) throw error
+      const { data: { publicUrl } } = supabase.storage.from('nntablet').getPublicUrl(path)
+      if (sessionToken) {
+        const { data: session } = await supabase
+          .from('craft_sessions').select('media_urls').eq('session_token', sessionToken).single()
+        await supabase.from('craft_sessions')
+          .update({ media_urls: [...(session?.media_urls || []), publicUrl] })
+          .eq('session_token', sessionToken)
+      }
+      URL.revokeObjectURL(captured.url)
+      addSessionPhoto(publicUrl)
+    } catch (err) {
+      console.error('사진 저장 실패:', err)
+      dismissPhotoPrompt()
+    } finally {
+      setUploading(false)
+      setCameraOpen(false)
+      setCaptured(null)
+    }
+  }
+
+  const cancel = () => {
+    closeCamera()
+    dismissPhotoPrompt()
+  }
+
+  // clean up stream when overlay unmounts or hides
+  useEffect(() => {
+    if (!showPhotoPrompt) {
+      stopStream()
+      setCameraOpen(false)
+      if (captured) { URL.revokeObjectURL(captured.url); setCaptured(null) }
+    }
+  }, [showPhotoPrompt, stopStream]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (!showPhotoPrompt) return null
+
   return (
     <div style={s.overlay}>
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept={isTimelapse ? 'video/*' : 'image/*'}
-        capture="environment"
-        style={{ display: 'none' }}
-        onChange={handleFile}
-        onClick={e => { e.target.value = '' }}
-      />
+      <canvas ref={canvasRef} style={{ display: 'none' }} />
 
-      <div style={s.card}>
-        <span style={s.icon}>{isTimelapse ? '🎬' : (recordMode === 'auto' ? '📷' : '🔔')}</span>
+      {cameraOpen ? (
+        <div style={s.cameraModal}>
+          {camError ? (
+            <div style={s.camError}>
+              <p style={s.camErrorText}>카메라를 사용할 수 없어요</p>
+              <button style={s.btnSecondary} onClick={cancel}>닫기</button>
+            </div>
+          ) : captured ? (
+            <>
+              <img src={captured.url} alt="preview" style={s.preview} />
+              <div style={s.camActions}>
+                <button style={s.btnSecondary} onClick={retake}>다시 찍기</button>
+                <button style={s.btnPrimary} onClick={confirmPhoto} disabled={uploading}>
+                  {uploading ? '저장 중...' : '사용하기'}
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <video ref={videoRef} style={s.videoFeed} playsInline muted autoPlay />
+              <div style={s.camActions}>
+                <button style={s.btnSecondary} onClick={cancel}>취소</button>
+                <button style={s.shutterBtn} onClick={takeSnapshot}>
+                  <div style={s.shutterInner} />
+                </button>
+                <div style={{ flex: 1 }} />
+              </div>
+            </>
+          )}
+        </div>
+      ) : (
+        <div style={s.card}>
+          <span style={s.icon}>{recordMode === 'auto' ? '📷' : '🔔'}</span>
 
-        {isTimelapse ? (
-          <>
-            <p style={s.title}>영상 촬영 시간이에요!</p>
-            <p style={s.sub}>10초 정도 작업 모습을 담아주세요</p>
-            {recordMode === 'auto' ? (
-              <button style={s.btnPrimary} onClick={() => fileInputRef.current?.click()}>
-                지금 촬영하기
-              </button>
-            ) : (
+          {recordMode === 'auto' ? (
+            <>
+              <p style={s.title}>촬영 시간이에요!</p>
+              <p style={s.sub}>카메라가 열립니다</p>
+              <button style={s.btnPrimary} onClick={openCamera}>지금 찍기</button>
+            </>
+          ) : (
+            <>
+              <p style={s.title}>사진을 찍을까요?</p>
+              <p style={s.sub}>5분이 지났어요</p>
               <div style={s.btnRow}>
                 <button style={s.btnSecondary} onClick={dismissPhotoPrompt}>건너뛰기</button>
-                <button style={s.btnPrimary} onClick={() => fileInputRef.current?.click()}>촬영하기</button>
+                <button style={s.btnPrimary} onClick={openCamera}>찍기</button>
               </div>
-            )}
-          </>
-        ) : recordMode === 'auto' ? (
-          <>
-            <p style={s.title}>촬영 시간이에요!</p>
-            <p style={s.sub}>카메라가 열립니다</p>
-            <button style={s.btnPrimary} onClick={() => fileInputRef.current?.click()}>
-              지금 찍기
-            </button>
-          </>
-        ) : (
-          <>
-            <p style={s.title}>사진을 찍을까요?</p>
-            <p style={s.sub}>15분이 지났어요</p>
-            <div style={s.btnRow}>
-              <button style={s.btnSecondary} onClick={dismissPhotoPrompt}>건너뛰기</button>
-              <button style={s.btnPrimary} onClick={() => fileInputRef.current?.click()}>찍기</button>
-            </div>
-          </>
-        )}
-      </div>
+            </>
+          )}
+        </div>
+      )}
     </div>
   )
 }
@@ -91,7 +176,7 @@ const s = {
   overlay: {
     position: 'absolute',
     inset: 0,
-    background: 'rgba(0,0,0,0.4)',
+    background: 'rgba(0,0,0,0.5)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -109,10 +194,7 @@ const s = {
     boxShadow: '0 16px 56px rgba(0,0,0,0.22)',
     minWidth: 300,
   },
-  icon: {
-    fontSize: 52,
-    marginBottom: 4,
-  },
+  icon: { fontSize: 52, marginBottom: 4 },
   title: {
     fontSize: 24,
     fontWeight: 700,
@@ -128,12 +210,7 @@ const s = {
     margin: 0,
     textAlign: 'center',
   },
-  btnRow: {
-    display: 'flex',
-    gap: 10,
-    marginTop: 8,
-    width: '100%',
-  },
+  btnRow: { display: 'flex', gap: 10, marginTop: 8, width: '100%' },
   btnSecondary: {
     flex: 1,
     padding: '13px',
@@ -159,5 +236,70 @@ const s = {
     fontFamily: 'var(--font)',
     marginTop: 8,
     width: '100%',
+  },
+  // camera modal
+  cameraModal: {
+    width: '80vw',
+    maxWidth: 900,
+    background: '#1a1814',
+    borderRadius: 24,
+    overflow: 'hidden',
+    display: 'flex',
+    flexDirection: 'column',
+    boxShadow: '0 16px 56px rgba(0,0,0,0.5)',
+  },
+  videoFeed: {
+    width: '100%',
+    aspectRatio: '16 / 9',
+    objectFit: 'cover',
+    display: 'block',
+    background: '#000',
+  },
+  preview: {
+    width: '100%',
+    aspectRatio: '16 / 9',
+    objectFit: 'cover',
+    display: 'block',
+  },
+  camActions: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 20,
+    padding: '20px 32px',
+    background: 'rgba(250,248,242,0.97)',
+  },
+  shutterBtn: {
+    width: 64,
+    height: 64,
+    borderRadius: '50%',
+    border: '3px solid #2A2720',
+    background: 'rgba(255,255,255,0.9)',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  shutterInner: {
+    width: 48,
+    height: 48,
+    borderRadius: '50%',
+    background: '#2A2720',
+  },
+  camError: {
+    padding: 40,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: 16,
+    background: 'rgba(250,248,242,0.97)',
+  },
+  camErrorText: {
+    fontSize: 16,
+    fontWeight: 600,
+    color: '#2A2720',
+    fontFamily: 'var(--font)',
+    margin: 0,
   },
 }

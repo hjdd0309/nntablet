@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 
 const AppContext = createContext(null)
 
-export const SHOT_INTERVAL_SECS = 15 * 60 // 15분
+export const SHOT_INTERVAL_SECS = 5 * 60 // 5분
 
 export function AppProvider({ children }) {
   const [language, setLanguage] = useState('English')
@@ -18,8 +18,6 @@ export function AppProvider({ children }) {
   const [showPhotoPrompt, setShowPhotoPrompt] = useState(false)
   const [nextShotCountdown, setNextShotCountdown] = useState(null) // 초
   const [sessionPhotos, setSessionPhotos] = useState([])
-  const [captureType, setCaptureType] = useState(null) // 'timelapse' | 'photos'
-
   // 1초마다 카운트다운
   useEffect(() => {
     if (!recordMode || showPhotoPrompt || nextShotCountdown === null) return
@@ -31,9 +29,8 @@ export function AppProvider({ children }) {
     return () => clearTimeout(timer)
   }, [recordMode, showPhotoPrompt, nextShotCountdown])
 
-  const startRecording = useCallback((mode, type) => {
+  const startRecording = useCallback((mode) => {
     setRecordMode(mode)
-    setCaptureType(type)
     setNextShotCountdown(SHOT_INTERVAL_SECS)
     setShowPhotoPrompt(false)
     setSessionPhotos([])
@@ -41,7 +38,6 @@ export function AppProvider({ children }) {
 
   const stopRecording = useCallback(() => {
     setRecordMode(null)
-    setCaptureType(null)
     setNextShotCountdown(null)
     setShowPhotoPrompt(false)
   }, [])
@@ -49,7 +45,6 @@ export function AppProvider({ children }) {
   const resetSession = useCallback(() => {
     setSessionToken(null)
     setRecordMode(null)
-    setCaptureType(null)
     setNextShotCountdown(null)
     setShowPhotoPrompt(false)
     setSessionPhotos([])
@@ -80,7 +75,6 @@ export function AppProvider({ children }) {
       showHelpModal, setShowHelpModal,
       sessionToken, setSessionToken,
       recordMode,
-      captureType,
       showPhotoPrompt,
       nextShotCountdown,
       sessionPhotos,

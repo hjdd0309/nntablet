@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import Header from '../components/Header'
+import StepProgress from '../components/StepProgress'
 import { supabase } from '../lib/supabase'
 import { useT } from '../i18n'
 
@@ -9,6 +10,7 @@ export default function Gallery() {
   const location = useLocation()
   const t = useT()
   const bgImage = location.state?.fromShare ? '/7_갤러리.png' : '/홈.png'
+  const fromFlow = !!location.state?.fromFlow
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [showMySaved, setShowMySaved] = useState(false)
@@ -67,6 +69,7 @@ export default function Gallery() {
     <div style={styles.container}>
       <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(${bgImage})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }} />
       <Header showBack showCall showHome />
+      {fromFlow && <StepProgress currentStep={3} />}
 
       <div style={styles.pageHeader}>
         <h1 style={styles.title}>{t.galleryTitle}</h1>
@@ -140,6 +143,14 @@ export default function Gallery() {
         ))}
       </div>
 
+      {fromFlow && (
+        <div style={styles.nextWrap}>
+          <button style={styles.nextBtn} onClick={() => navigate('/crafting')}>
+            {t.stepHandcrafting} →
+          </button>
+        </div>
+      )}
+
       {selectedItem && (
         <div style={styles.overlay} onClick={() => setSelectedItem(null)}>
           <div style={styles.detailModal} onClick={(e) => e.stopPropagation()}>
@@ -170,6 +181,24 @@ export default function Gallery() {
 }
 
 const styles = {
+  nextWrap: {
+    display: 'flex',
+    justifyContent: 'flex-end',
+    padding: '8px 28px 12px',
+    zIndex: 2,
+    flexShrink: 0,
+  },
+  nextBtn: {
+    padding: '12px 32px',
+    borderRadius: 30,
+    background: 'linear-gradient(135deg, #F8CB7F 0%, #E8924E 100%)',
+    border: 'none',
+    fontSize: 15,
+    fontWeight: 700,
+    color: '#2A2720',
+    cursor: 'pointer',
+    fontFamily: 'var(--font)',
+  },
   container: {
     width: '100%',
     height: '100%',
