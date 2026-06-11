@@ -97,11 +97,11 @@ export default function AskForHelpModal({ onClose }) {
     rec.onerror = (e) => {
       setIsListening(false)
       stopVisualization()
-      if (e.error === 'not-allowed') setError('마이크 권한이 필요해요. 브라우저 설정에서 허용해주세요.')
-      else if (e.error === 'no-speech') setError('음성이 감지되지 않았어요. 다시 시도해주세요.')
-      else if (e.error === 'network') setError('네트워크 오류가 발생했어요.')
-      else if (e.error === 'service-not-allowed') setError('음성 인식을 사용하려면 HTTPS가 필요해요.')
-      else setError('음성 인식 오류: ' + e.error)
+      if (e.error === 'not-allowed') setError('마이크 권한이 필요해요. 브라우저 주소창 왼쪽 자물쇠 아이콘 → 마이크 허용 후 다시 시도해주세요.')
+      else if (e.error === 'no-speech') setError('음성이 감지되지 않았어요. 조금 더 크게 말하거나 아래 텍스트로 직접 입력해주세요.')
+      else if (e.error === 'network') setError('음성 인식 네트워크 오류예요. 인터넷 연결을 확인하거나 아래에 직접 입력해주세요.')
+      else if (e.error === 'service-not-allowed') setError('이 환경에서는 음성 인식이 지원되지 않아요. 아래 텍스트 입력란에 직접 써주세요.')
+      else setError('음성 인식 오류: ' + e.error + ' — 아래에 직접 입력해주세요.')
     }
     rec.onend = () => { setIsListening(false); stopVisualization() }
     recRef.current = rec
