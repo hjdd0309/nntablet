@@ -19,20 +19,18 @@ export default function Gallery() {
   const [selectedItem, setSelectedItem] = useState(null)
 
   useEffect(() => {
+    async function fetchGallery() {
+      const { data, error } = await supabase
+        .from('gallery')
+        .select('*')
+        .order('created_at', { ascending: false })
+      if (!error && data) {
+        setItems(data.map(item => ({ ...item, liked: false, saved: false })))
+      }
+      setLoading(false)
+    }
     fetchGallery()
   }, [])
-
-  async function fetchGallery() {
-    setLoading(true)
-    const { data, error } = await supabase
-      .from('gallery')
-      .select('*')
-      .order('created_at', { ascending: false })
-    if (!error && data) {
-      setItems(data.map(item => ({ ...item, liked: false, saved: false })))
-    }
-    setLoading(false)
-  }
 
   const toggleLike = async (id) => {
     const item = items.find(i => i.id === id)
@@ -277,6 +275,7 @@ const styles = {
     padding: '0 20px 16px',
     display: 'grid',
     gridTemplateColumns: 'repeat(3, 1fr)',
+    gridAutoRows: 260,
     gap: 16,
     overflowY: 'auto',
     zIndex: 2,
@@ -301,9 +300,11 @@ const styles = {
     boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
     display: 'flex',
     flexDirection: 'column',
+    height: '100%',
   },
   cardImg: {
-    height: 720,
+    flex: 1,
+    minHeight: 0,
     position: 'relative',
     overflow: 'hidden',
   },

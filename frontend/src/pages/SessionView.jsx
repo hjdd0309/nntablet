@@ -1,24 +1,8 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom'
+import html2canvas from 'html2canvas'
 import { supabase } from '../lib/supabase'
 import logo from '../assets/로고.png'
-
-async function saveImage(url, filename = 'nanyeong-photo.jpg') {
-  try {
-    const res = await fetch(url)
-    const blob = await res.blob()
-    const file = new File([blob], filename, { type: blob.type || 'image/jpeg' })
-    if (navigator.canShare?.({ files: [file] })) {
-      await navigator.share({ files: [file], title: '나녕 체험 사진' })
-    } else if (navigator.share) {
-      await navigator.share({ url, title: '나녕 체험 사진' })
-    } else {
-      window.open(url, '_blank')
-    }
-  } catch {
-    window.open(url, '_blank')
-  }
-}
 
 export default function SessionView() {
   const { token } = useParams()
@@ -29,9 +13,11 @@ export default function SessionView() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [selected, setSelected] = useState(null)
+  const [saving, setSaving] = useState(false)
+  const captureRef = useRef(null)
 
   useEffect(() => {
-    async function fetch() {
+    async function fetchSession() {
       const { data, error } = await supabase
         .from('craft_sessions')
         .select('*')
@@ -41,8 +27,37 @@ export default function SessionView() {
       else setSession(data)
       setLoading(false)
     }
-    fetch()
+    fetchSession()
   }, [token])
+
+  async function handleSaveAll() {
+    if (!captureRef.current) return
+    setSaving(true)
+    try {
+      const canvas = await html2canvas(captureRef.current, {
+        useCORS: true,
+        allowTaint: false,
+        backgroundColor: '#FAF8F2',
+        scale: 2,
+      })
+      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.95))
+      const file = new File([blob], 'nanyeong-record.jpg', { type: 'image/jpeg' })
+
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], title: '나녕 체험 기록' })
+      } else {
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = 'nanyeong-record.jpg'
+        a.click()
+        URL.revokeObjectURL(url)
+      }
+    } catch (e) {
+      console.error(e)
+    }
+    setSaving(false)
+  }
 
   if (loading) return (
     <div style={v.page}>
@@ -75,17 +90,20 @@ export default function SessionView() {
         </div>
       </div>
 
-      <div style={v.grid}>
-        {urls.map((url, i) => (
-          <div key={i} style={v.imgWrap}>
-            <img src={url} alt={`photo ${i + 1}`} style={v.img} onClick={() => setSelected(url)} />
-            {frameId && <img src={`/프레임${frameId}.png`} alt="" style={v.frameOverlay} />}
-            <button style={v.saveBtn} onClick={() => saveImage(url, `nanyeong-${i + 1}.jpg`)}>
-              ↓ 저장
-            </button>
-          </div>
-        ))}
+      <div ref={captureRef} style={v.captureArea}>
+        <div style={v.grid}>
+          {urls.map((url, i) => (
+            <div key={i} style={v.imgWrap} onClick={() => setSelected(url)}>
+              <img src={url} alt={`photo ${i + 1}`} style={v.img} crossOrigin="anonymous" />
+              {frameId && <img src={`/프레임${frameId}.png`} alt="" style={v.frameOverlay} />}
+            </div>
+          ))}
+        </div>
       </div>
+
+      <button style={v.saveAllBtn} onClick={handleSaveAll} disabled={saving}>
+        {saving ? '저장 중...' : '↓ 전체 저장'}
+      </button>
 
       {selected && (
         <div style={v.overlay} onClick={() => setSelected(null)}>
@@ -93,12 +111,6 @@ export default function SessionView() {
             <img src={selected} alt="" style={v.fullImg} />
             {frameId && <img src={`/프레임${frameId}.png`} alt="" style={v.frameOverlayFull} />}
           </div>
-          <button
-            style={v.fullSaveBtn}
-            onClick={e => { e.stopPropagation(); saveImage(selected) }}
-          >
-            ↓ 저장하기
-          </button>
         </div>
       )}
     </div>
@@ -121,6 +133,7 @@ const v = {
   header: {
     display: 'flex',
     alignItems: 'center',
+    gap: 12,
     padding: '20px 28px',
     borderBottom: '1px solid rgba(0,0,0,0.07)',
     background: 'rgba(255,255,255,0.8)',
@@ -168,45 +181,50 @@ const v = {
     color: '#ADA9A4',
     margin: '2px 0 0',
   },
+  saveAllBtn: {
+    position: 'fixed',
+    bottom: 28,
+    right: 28,
+    padding: '14px 28px',
+    borderRadius: 30,
+    background: 'linear-gradient(135deg, #F8CB7F 0%, #E8924E 100%)',
+    border: 'none',
+    fontSize: 15,
+    fontWeight: 700,
+    color: '#2A2720',
+    cursor: 'pointer',
+    fontFamily: "'Nunito', sans-serif",
+    boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
+    zIndex: 50,
+  },
   errorText: {
     fontSize: 16,
     color: '#7A7570',
     textAlign: 'center',
   },
+  captureArea: {
+    background: '#FAF8F2',
+  },
   grid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-    gap: 12,
-    padding: '24px 24px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 16,
+    padding: '24px 24px 100px',
   },
   imgWrap: {
-    borderRadius: 12,
+    borderRadius: 16,
     overflow: 'hidden',
-    aspectRatio: '1',
+    width: '100%',
+    aspectRatio: '4 / 3',
     boxShadow: '0 2px 12px rgba(0,0,0,0.10)',
     position: 'relative',
+    cursor: 'pointer',
   },
   img: {
     width: '100%',
     height: '100%',
     objectFit: 'cover',
     display: 'block',
-    cursor: 'pointer',
-  },
-  saveBtn: {
-    position: 'absolute',
-    bottom: 8,
-    right: 8,
-    padding: '6px 14px',
-    borderRadius: 20,
-    background: 'rgba(255,255,255,0.92)',
-    border: 'none',
-    fontSize: 13,
-    fontWeight: 700,
-    color: '#2A2720',
-    cursor: 'pointer',
-    fontFamily: "'Nunito', sans-serif",
-    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
   },
   frameOverlay: {
     position: 'absolute',
@@ -250,17 +268,5 @@ const v = {
     height: '100%',
     objectFit: 'fill',
     pointerEvents: 'none',
-  },
-  fullSaveBtn: {
-    padding: '14px 48px',
-    borderRadius: 30,
-    background: 'linear-gradient(135deg, #F8CB7F 0%, #E8924E 100%)',
-    border: 'none',
-    fontSize: 17,
-    fontWeight: 700,
-    color: '#2A2720',
-    cursor: 'pointer',
-    fontFamily: "'Nunito', sans-serif",
-    boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
   },
 }
