@@ -4,6 +4,16 @@ import Header from '../components/Header'
 import StepProgress from '../components/StepProgress'
 import { useT } from '../i18n'
 
+const STEP_IMAGES = {
+  1: '/스텝1.jpg',
+  2: '/스텝2.jpg',
+  3: ['/스텝3_1.jpg', '/스텝3_2.jpg', '/스텝3_3.jpg'],
+  4: '/스텝4.jpg',
+  5: '/스텝5.jpg',
+  6: '/스텝6.jpg',
+  7: '/스텝7.jpg',
+}
+
 const GLAZE_COLORS = [
   { id: 'pink',   color: '#D4B8B0' },
   { id: 'peach',  color: '#C8B8A8' },
@@ -46,35 +56,45 @@ export default function CraftingPage() {
         </h2>
 
         <div style={styles.imageBox}>
-          {isColorStep ? (
-            <div style={styles.colorRow}>
-              {GLAZE_COLORS.map((g, i) => (
-                <div key={g.id} style={styles.colorItem}>
-                  {i === 0 && <span style={styles.colorBadge}>{t.craftBest}</span>}
-                  {i === 1 && <span style={styles.colorBadge}>{t.craftArtisanPick}</span>}
-                  {i > 1 && <span style={styles.colorBadgeEmpty} />}
-                  <button
-                    style={{
-                      ...styles.colorCircle,
-                      background: g.color,
-                      ...(selectedColor === g.id ? styles.colorCircleSelected : {}),
-                    }}
-                    onClick={() => setSelectedColor(g.id)}
-                  />
-                  <span style={styles.colorLabel}>color</span>
-                </div>
+          {/* 스텝 이미지 */}
+          {Array.isArray(STEP_IMAGES[craftStep]) ? (
+            <div style={styles.multiImgRow}>
+              {STEP_IMAGES[craftStep].map((src, i) => (
+                <img key={i} src={src} alt={`step ${craftStep}-${i + 1}`} style={styles.stepImgMulti} />
               ))}
             </div>
+          ) : STEP_IMAGES[craftStep] ? (
+            <img src={STEP_IMAGES[craftStep]} alt={`step ${craftStep}`} style={styles.stepImg} />
           ) : null}
 
-          {craftStep >= 2 && (
-            <button style={styles.prevBtn} onClick={handlePrev}>
-              ←
-            </button>
+          {/* 색상 선택 (스텝2) */}
+          {isColorStep && (
+            <div style={styles.colorOverlay}>
+              <div style={styles.colorRow}>
+                {GLAZE_COLORS.map((g, i) => (
+                  <div key={g.id} style={styles.colorItem}>
+                    {i === 0 && <span style={styles.colorBadge}>{t.craftBest}</span>}
+                    {i === 1 && <span style={styles.colorBadge}>{t.craftArtisanPick}</span>}
+                    {i > 1 && <span style={styles.colorBadgeEmpty} />}
+                    <button
+                      style={{
+                        ...styles.colorCircle,
+                        background: g.color,
+                        ...(selectedColor === g.id ? styles.colorCircleSelected : {}),
+                      }}
+                      onClick={() => setSelectedColor(g.id)}
+                    />
+                    <span style={styles.colorLabel}>color</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
-          <button style={styles.nextBtn} onClick={handleNext}>
-            →
-          </button>
+
+          {craftStep >= 2 && (
+            <button style={styles.prevBtn} onClick={handlePrev}>←</button>
+          )}
+          <button style={styles.nextBtn} onClick={handleNext}>→</button>
         </div>
       </div>
     </div>
@@ -126,11 +146,46 @@ const styles = {
     justifyContent: 'center',
     overflow: 'hidden',
   },
+  stepImg: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'contain',
+    display: 'block',
+  },
+  multiImgRow: {
+    display: 'flex',
+    gap: 8,
+    width: '100%',
+    height: '100%',
+    padding: 8,
+    boxSizing: 'border-box',
+  },
+  stepImgMulti: {
+    flex: 1,
+    minWidth: 0,
+    height: '100%',
+    objectFit: 'contain',
+    borderRadius: 10,
+  },
+  colorOverlay: {
+    position: 'absolute',
+    bottom: 72,
+    left: 0,
+    right: 0,
+    display: 'flex',
+    justifyContent: 'center',
+    pointerEvents: 'none',
+  },
   colorRow: {
     display: 'flex',
     gap: 24,
     alignItems: 'flex-end',
     justifyContent: 'center',
+    pointerEvents: 'auto',
+    background: 'rgba(250,248,242,0.85)',
+    backdropFilter: 'blur(6px)',
+    borderRadius: 20,
+    padding: '12px 24px',
   },
   colorItem: {
     display: 'flex',
