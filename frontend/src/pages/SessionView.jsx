@@ -1,7 +1,24 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import logo from '../assets/로고.png'
+
+async function saveImage(url, filename = 'nanyeong-photo.jpg') {
+  try {
+    const res = await fetch(url)
+    const blob = await res.blob()
+    const file = new File([blob], filename, { type: blob.type || 'image/jpeg' })
+    if (navigator.canShare?.({ files: [file] })) {
+      await navigator.share({ files: [file], title: '나녕 체험 사진' })
+    } else if (navigator.share) {
+      await navigator.share({ url, title: '나녕 체험 사진' })
+    } else {
+      window.open(url, '_blank')
+    }
+  } catch {
+    window.open(url, '_blank')
+  }
+}
 
 export default function SessionView() {
   const { token } = useParams()
@@ -57,8 +74,11 @@ export default function SessionView() {
       {session.mode === 'photos' ? (
         <div style={v.grid}>
           {urls.map((url, i) => (
-            <div key={i} style={v.imgWrap} onClick={() => setSelected(url)}>
-              <img src={url} alt={`photo ${i + 1}`} style={v.img} />
+            <div key={i} style={v.imgWrap}>
+              <img src={url} alt={`photo ${i + 1}`} style={v.img} onClick={() => setSelected(url)} />
+              <button style={v.saveBtn} onClick={() => saveImage(url, `nanyeong-${i + 1}.jpg`)}>
+                ↓ 저장
+              </button>
             </div>
           ))}
         </div>
@@ -76,6 +96,12 @@ export default function SessionView() {
       {selected && (
         <div style={v.overlay} onClick={() => setSelected(null)}>
           <img src={selected} alt="" style={v.fullImg} onClick={e => e.stopPropagation()} />
+          <button
+            style={v.fullSaveBtn}
+            onClick={e => { e.stopPropagation(); saveImage(selected) }}
+          >
+            ↓ 저장하기
+          </button>
         </div>
       )}
     </div>
@@ -137,15 +163,30 @@ const v = {
     borderRadius: 12,
     overflow: 'hidden',
     aspectRatio: '1',
-    cursor: 'pointer',
     boxShadow: '0 2px 12px rgba(0,0,0,0.10)',
+    position: 'relative',
   },
   img: {
     width: '100%',
     height: '100%',
     objectFit: 'cover',
     display: 'block',
-    transition: 'transform 0.2s ease',
+    cursor: 'pointer',
+  },
+  saveBtn: {
+    position: 'absolute',
+    bottom: 8,
+    right: 8,
+    padding: '6px 14px',
+    borderRadius: 20,
+    background: 'rgba(255,255,255,0.92)',
+    border: 'none',
+    fontSize: 13,
+    fontWeight: 700,
+    color: '#2A2720',
+    cursor: 'pointer',
+    fontFamily: "'Nunito', sans-serif",
+    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
   },
   videoWrap: {
     padding: '24px',
@@ -171,8 +212,21 @@ const v = {
   },
   fullImg: {
     maxWidth: '100%',
-    maxHeight: '100%',
+    maxHeight: '85%',
     borderRadius: 12,
     objectFit: 'contain',
+  },
+  fullSaveBtn: {
+    marginTop: 16,
+    padding: '14px 48px',
+    borderRadius: 30,
+    background: 'linear-gradient(135deg, #F8CB7F 0%, #E8924E 100%)',
+    border: 'none',
+    fontSize: 17,
+    fontWeight: 700,
+    color: '#2A2720',
+    cursor: 'pointer',
+    fontFamily: "'Nunito', sans-serif",
+    boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
   },
 }
