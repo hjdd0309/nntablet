@@ -182,22 +182,22 @@ export default function Gallery() {
 
 const styles = {
   nextWrap: {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    padding: '8px 28px 12px',
-    zIndex: 2,
-    flexShrink: 0,
+    position: 'absolute',
+    bottom: 16,
+    right: 28,
+    zIndex: 10,
   },
   nextBtn: {
     padding: '12px 32px',
     borderRadius: 30,
-    background: 'linear-gradient(135deg, #F8CB7F 0%, #E8924E 100%)',
-    border: 'none',
+    background: 'rgba(255,255,255,0.92)',
+    border: '1px solid rgba(0,0,0,0.1)',
     fontSize: 15,
     fontWeight: 700,
     color: '#2A2720',
     cursor: 'pointer',
     fontFamily: 'var(--font)',
+    boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
   },
   container: {
     width: '100%',
@@ -273,6 +273,7 @@ const styles = {
   },
   grid: {
     flex: 1,
+    minHeight: 0,
     padding: '0 20px 16px',
     display: 'grid',
     gridTemplateColumns: 'repeat(3, 1fr)',
@@ -298,9 +299,11 @@ const styles = {
     borderRadius: 16,
     overflow: 'hidden',
     boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
+    display: 'flex',
+    flexDirection: 'column',
   },
   cardImg: {
-    height: 180,
+    height: 720,
     position: 'relative',
     overflow: 'hidden',
   },
@@ -330,11 +333,13 @@ const styles = {
   expandIcon: { fontSize: 11, lineHeight: 1 },
   expandIconSmall: { fontSize: 11, lineHeight: 1 },
   cardFooter: {
-    padding: '10px 14px',
+    padding: '6px 14px',
     display: 'flex',
     alignItems: 'center',
     gap: 8,
-    background: 'rgba(250,248,242,0.8)',
+    background: '#FAF8F2',
+    flexShrink: 0,
+    borderTop: '1px solid rgba(0,0,0,0.05)',
   },
   statBtn: {
     display: 'flex',
@@ -353,8 +358,8 @@ const styles = {
   username: {
     marginLeft: 'auto',
     fontSize: 13,
-    fontWeight: 600,
-    color: '#7A7570',
+    fontWeight: 700,
+    color: '#2A2720',
   },
   overlay: {
     position: 'absolute',

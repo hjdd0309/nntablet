@@ -95,6 +95,9 @@ const translations = {
     photoReminderSub: '5분마다 사진 알림을 받아보세요',
     takeAPhoto: '사진을 찍어주세요!',
 
+    colorNotice: '색은 1가지 색만 가능합니다, 1가지만 골라주세요. 색은 상황에 따라 없거나 추가되는 색이 있을 수 있습니다.',
+    step4Notice: '알맹이를 5개 골라서 눕힌 상태가 아닌 세워서 배치해주세요.',
+    step3Captions: ['유약통을 비스듬히 세워주세요', '붓 뒤쪽으로 유약을 섞어주세요', '고르게 잘 발라주세요'],
     enamelTitle: '에나멜링',
     craftSteps: [
       '구리판을 확인해주세요.',
@@ -228,6 +231,9 @@ const translations = {
     photoReminderSub: 'Get a photo reminder every 5 minutes',
     takeAPhoto: 'Take a photo!',
 
+    colorNotice: 'Only one color is allowed. Please choose just one. Available colors may vary depending on the situation.',
+    step4Notice: 'Choose 5 beads and place them standing upright, not lying flat.',
+    step3Captions: ['Tilt the glaze container slightly', 'Mix the glaze with the back of the brush', 'Apply it evenly and smoothly'],
     enamelTitle: 'Enameling',
     craftSteps: [
       'Check your copper plate.',

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useParams, useSearchParams } from 'react-router-dom'
+import { useParams, useSearchParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import logo from '../assets/로고.png'
 
@@ -24,6 +24,7 @@ export default function SessionView() {
   const { token } = useParams()
   const [searchParams] = useSearchParams()
   const frameId = searchParams.get('frame')
+  const navigate = useNavigate()
   const [session, setSession] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -64,9 +65,12 @@ export default function SessionView() {
   return (
     <div style={v.page}>
       <div style={v.header}>
-        <img src={logo} alt="나녕" style={v.logo} />
-        <div>
-          <p style={v.subtitle}>📷 체험 사진</p>
+        <button style={v.backBtn} onClick={() => navigate(-1)}>‹ 뒤로</button>
+        <div style={v.headerCenter}>
+          <img src={logo} alt="나녕" style={v.logo} />
+        </div>
+        <div style={v.headerRight}>
+          <p style={v.subtitle}>체험 사진</p>
           <p style={v.date}>{new Date(session.created_at).toLocaleDateString('ko-KR')}</p>
         </div>
       </div>
@@ -117,14 +121,37 @@ const v = {
   header: {
     display: 'flex',
     alignItems: 'center',
-    gap: 16,
-    padding: '24px 28px 20px',
+    padding: '20px 28px',
     borderBottom: '1px solid rgba(0,0,0,0.07)',
     background: 'rgba(255,255,255,0.8)',
     backdropFilter: 'blur(8px)',
     position: 'sticky',
     top: 0,
     zIndex: 10,
+  },
+  headerCenter: {
+    position: 'absolute',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    pointerEvents: 'none',
+  },
+  headerRight: {
+    marginLeft: 'auto',
+    textAlign: 'right',
+  },
+  backBtn: {
+    display: 'flex',
+    alignItems: 'center',
+    fontSize: 14,
+    fontWeight: 700,
+    color: '#2A2720',
+    background: 'rgba(0,0,0,0.06)',
+    border: '1px solid rgba(0,0,0,0.1)',
+    borderRadius: 14,
+    padding: '6px 12px',
+    cursor: 'pointer',
+    fontFamily: "'Nunito', sans-serif",
+    flexShrink: 0,
   },
   logo: {
     height: 40,

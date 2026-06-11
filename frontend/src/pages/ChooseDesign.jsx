@@ -58,10 +58,11 @@ export default function ChooseDesign() {
             </div>
           )}
         </div>
-
-        <button style={styles.nextBtn} onClick={() => navigate('/gallery', { state: { fromFlow: true } })}>
-          {t.exploreToGallery} →
-        </button>
+        <div style={styles.nextWrap}>
+          <button style={styles.nextBtn} onClick={() => navigate('/gallery', { state: { fromFlow: true } })}>
+            {t.stepGallery} →
+          </button>
+        </div>
       </div>
     </div>
   )
@@ -94,7 +95,7 @@ const styles = {
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: '0 60px 24px',
+    padding: '24px 60px 24px',
     gap: 20,
     zIndex: 2,
     overflow: 'hidden',
@@ -107,7 +108,6 @@ const styles = {
     boxShadow: '0 4px 32px rgba(0,0,0,0.12)',
     background: '#1a1814',
     aspectRatio: '16 / 9',
-    flexShrink: 0,
   },
   videoWrap: {
     width: '100%',
@@ -160,16 +160,23 @@ const styles = {
     fontFamily: 'var(--font)',
     textAlign: 'center',
   },
+  nextWrap: {
+    width: '100%',
+    maxWidth: 860,
+    display: 'flex',
+    justifyContent: 'flex-end',
+  },
   nextBtn: {
-    padding: '14px 36px',
+    padding: '12px 28px',
     borderRadius: 30,
-    background: 'linear-gradient(135deg, #F8CB7F 0%, #E8924E 100%)',
-    border: 'none',
-    fontSize: 16,
+    background: 'rgba(255,255,255,0.92)',
+    border: '1px solid rgba(0,0,0,0.1)',
+    fontSize: 15,
     fontWeight: 700,
     color: '#2A2720',
     cursor: 'pointer',
     fontFamily: 'var(--font)',
+    boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
     flexShrink: 0,
   },
 }

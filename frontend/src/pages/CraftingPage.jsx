@@ -45,26 +45,39 @@ export default function CraftingPage() {
         </h2>
 
         <div style={styles.imageBox}>
+          {/* 스텝별 안내 문구 - 절대 위치로 상단 중앙 */}
+          {(craftStep === 2 || craftStep === 4) && (
+            <div style={styles.step2Notice}>
+              <p style={styles.step2NoticeText}>
+                {craftStep === 2 ? t.colorNotice : t.step4Notice}
+              </p>
+            </div>
+          )}
+
           {/* 스텝 이미지 */}
           {Array.isArray(STEP_IMAGES[craftStep]) ? (
             <div style={styles.multiImgRow}>
               {STEP_IMAGES[craftStep].map((src, i) => (
-                <img key={i} src={src} alt={`step ${craftStep}-${i + 1}`} style={styles.stepImgMulti} />
+                <div key={i} style={styles.stepImgCardWrap}>
+                  <p style={styles.stepImgCaption}>{t.step3Captions[i]}</p>
+                  <div style={styles.stepImgCard}>
+                    <img src={src} alt={`step ${craftStep}-${i + 1}`} style={styles.stepImgMulti} />
+                  </div>
+                </div>
               ))}
             </div>
           ) : STEP_IMAGES[craftStep] ? (
-            <img src={STEP_IMAGES[craftStep]} alt={`step ${craftStep}`} style={styles.stepImg} />
+            <img
+              src={STEP_IMAGES[craftStep]}
+              alt={`step ${craftStep}`}
+              style={{
+                ...styles.stepImg,
+                ...((craftStep === 2 || craftStep === 4)
+                  ? { position: 'absolute', top: '58%', left: '50%', transform: 'translate(-50%, -50%)', margin: 0, maxWidth: '72%', maxHeight: '65%' }
+                  : { position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', margin: 0 }),
+              }}
+            />
           ) : null}
-
-          {/* 스텝2 안내 문구 */}
-          {craftStep === 2 && (
-            <div style={styles.step2Notice}>
-              <p style={styles.step2NoticeText}>
-                색은 1가지 색만 가능합니다. 1가지만 골라주세요.<br />
-                색은 상황에 따라 없거나 추가되는 색이 있을 수 있습니다.
-              </p>
-            </div>
-          )}
 
           {craftStep >= 2 && (
             <button style={styles.prevBtn} onClick={handlePrev}>←</button>
@@ -117,54 +130,77 @@ const styles = {
     boxShadow: '0 2px 16px rgba(0,0,0,0.06)',
     position: 'relative',
     display: 'flex',
+    flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 12,
     overflow: 'hidden',
+    padding: '16px',
   },
   stepImg: {
-    maxWidth: '70%',
-    maxHeight: '80%',
+    maxWidth: '92%',
+    maxHeight: '88%',
     objectFit: 'contain',
     display: 'block',
     borderRadius: 16,
     boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
+    margin: 'auto',
   },
   multiImgRow: {
     display: 'flex',
+    flexDirection: 'row',
     gap: 12,
-    width: '90%',
-    height: '85%',
-    padding: 4,
+    width: '100%',
+    padding: '4px 8px 64px',
     boxSizing: 'border-box',
+    alignItems: 'flex-start',
   },
-  stepImgMulti: {
+  stepImgCardWrap: {
     flex: 1,
     minWidth: 0,
-    height: '100%',
-    objectFit: 'cover',
-    borderRadius: 16,
-    boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 8,
   },
-  step2Notice: {
-    position: 'absolute',
-    bottom: 72,
-    left: '50%',
-    transform: 'translateX(-50%)',
-    background: 'rgba(42,39,32,0.65)',
-    backdropFilter: 'blur(6px)',
-    borderRadius: 14,
-    padding: '10px 20px',
-    pointerEvents: 'none',
-    whiteSpace: 'nowrap',
-  },
-  step2NoticeText: {
-    fontSize: 13,
+  stepImgCaption: {
+    fontSize: 15,
     fontWeight: 600,
-    color: '#FAF8F2',
+    color: '#2A2720',
     fontFamily: 'var(--font)',
     margin: 0,
     textAlign: 'center',
-    lineHeight: 1.7,
+    flexShrink: 0,
+  },
+  stepImgCard: {
+    width: '100%',
+    aspectRatio: '4 / 3',
+    borderRadius: 16,
+    overflow: 'hidden',
+    boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
+  },
+  stepImgMulti: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
+    display: 'block',
+  },
+  step2Notice: {
+    position: 'absolute',
+    top: '10%',
+    left: 0,
+    right: 0,
+    display: 'flex',
+    justifyContent: 'center',
+    pointerEvents: 'none',
+  },
+  step2NoticeText: {
+    fontSize: 20,
+    fontWeight: 600,
+    color: '#2A2720',
+    fontFamily: 'var(--font)',
+    margin: 0,
+    textAlign: 'center',
+    whiteSpace: 'nowrap',
   },
   nextBtn: {
     position: 'absolute',

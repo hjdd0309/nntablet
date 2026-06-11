@@ -16,7 +16,7 @@ export default function ProcessResultPage() {
   return (
     <div style={styles.container}>
       <div style={{ position: 'absolute', inset: 0, backgroundImage: 'url(/7_기록.png)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }} />
-      <Header showBack backTo="/completion" showCall showHome />
+      <Header showBack backTo="/frame-select" showCall showHome />
 
       <div style={styles.content}>
         {qrUrl ? (
@@ -31,7 +31,7 @@ export default function ProcessResultPage() {
               <p style={styles.qrHint}>카메라로 QR을 스캔하세요</p>
             </div>
 
-            <button style={styles.viewBtn} onClick={() => navigate(`/view/${sessionToken}`)}>
+            <button style={styles.viewBtn} onClick={() => navigate(`/view/${sessionToken}${selectedFrame ? `?frame=${selectedFrame}` : ''}`)}>
               여기서 바로 보기 →
             </button>
           </>
