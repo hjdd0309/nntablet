@@ -73,7 +73,7 @@ export default function CraftingPage() {
               style={{
                 ...styles.stepImg,
                 ...((craftStep === 2 || craftStep === 4)
-                  ? { position: 'absolute', top: '58%', left: '50%', transform: 'translate(-50%, -50%)', margin: 0, maxWidth: '72%', maxHeight: '65%' }
+                  ? { position: 'absolute', top: '58%', left: '50%', transform: 'translate(-50%, -50%)', margin: 0, maxWidth: '76%', maxHeight: '70%' }
                   : { position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', margin: 0 }),
               }}
             />

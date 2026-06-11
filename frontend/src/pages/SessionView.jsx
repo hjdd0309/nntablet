@@ -79,25 +79,27 @@ export default function SessionView() {
 
   return (
     <div style={v.page}>
-      <div style={v.header}>
-        <button style={v.backBtn} onClick={() => navigate(-1)}>‹ 뒤로</button>
-        <div style={v.headerCenter}>
-          <img src={logo} alt="나녕" style={v.logo} />
+      <div ref={captureRef} style={v.captureWrapper}>
+        <div style={v.header}>
+          <button style={v.backBtn} onClick={() => navigate(-1)}>‹ 뒤로</button>
+          <div style={v.headerCenter}>
+            <img src={logo} alt="나녕" style={v.logo} />
+          </div>
+          <div style={v.headerRight}>
+            <p style={v.subtitle}>체험 사진</p>
+            <p style={v.date}>{new Date(session.created_at).toLocaleDateString('ko-KR')}</p>
+          </div>
         </div>
-        <div style={v.headerRight}>
-          <p style={v.subtitle}>체험 사진</p>
-          <p style={v.date}>{new Date(session.created_at).toLocaleDateString('ko-KR')}</p>
-        </div>
-      </div>
 
-      <div ref={captureRef} style={v.captureArea}>
-        <div style={v.grid}>
-          {urls.map((url, i) => (
-            <div key={i} style={v.imgWrap} onClick={() => setSelected(url)}>
-              <img src={url} alt={`photo ${i + 1}`} style={v.img} crossOrigin="anonymous" />
-              {frameId && <img src={`/프레임${frameId}.png`} alt="" style={v.frameOverlay} />}
-            </div>
-          ))}
+        <div style={v.captureArea}>
+          <div style={v.grid}>
+            {urls.map((url, i) => (
+              <div key={i} style={v.imgWrap} onClick={() => setSelected(url)}>
+                <img src={url} alt={`photo ${i + 1}`} style={v.img} crossOrigin="anonymous" />
+                {frameId && <img src={`/프레임${frameId}.png`} alt="" style={v.frameOverlay} />}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -138,8 +140,7 @@ const v = {
     borderBottom: '1px solid rgba(0,0,0,0.07)',
     background: 'rgba(255,255,255,0.8)',
     backdropFilter: 'blur(8px)',
-    position: 'sticky',
-    top: 0,
+    position: 'relative',
     zIndex: 10,
   },
   headerCenter: {
@@ -201,6 +202,9 @@ const v = {
     fontSize: 16,
     color: '#7A7570',
     textAlign: 'center',
+  },
+  captureWrapper: {
+    background: '#FAF8F2',
   },
   captureArea: {
     background: '#FAF8F2',
