@@ -114,15 +114,32 @@ export default function AskForHelpModal({ onClose }) {
     if (isListening) { stopListening(); return }
     setOwnerMicResult('')
     setOwnerMicText('')
+    setError('')
     startListening(async (text) => {
       setOwnerMicText(text)
       setOwnerMicLoading(true)
       try {
         const result = await fetchTranslation(text)
         setOwnerMicResult(result)
-      } catch {}
+      } catch {
+        setError(t.translationError)
+      }
       setOwnerMicLoading(false)
     })
+  }
+
+  const handleQuestionSelect = async (questionText) => {
+    setOwnerMicText(questionText)
+    setOwnerMicResult('')
+    setError('')
+    setOwnerMicLoading(true)
+    try {
+      const result = await fetchTranslation(questionText)
+      setOwnerMicResult(result)
+    } catch {
+      setError(t.translationError)
+    }
+    setOwnerMicLoading(false)
   }
 
   const handleOwnerTextTranslate = async () => {
@@ -231,7 +248,7 @@ export default function AskForHelpModal({ onClose }) {
             <p style={styles.subtitle}>{t.selectQuestionSubtitle}</p>
             <div style={styles.questionsGrid}>
               {t.guestQuestions.map((q, i) => (
-                <button key={i} style={styles.questionCard}>
+                <button key={i} style={styles.questionCard} onClick={() => handleQuestionSelect(q.text)}>
                   <div style={styles.questionFace}>{q.emoji}</div>
                   <span style={styles.questionText}>{q.text}</span>
                 </button>
