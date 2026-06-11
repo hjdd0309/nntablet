@@ -8,8 +8,8 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
-        name: '나녕 공방',
-        short_name: '나녕',
+        name: '나녕tablet',
+        short_name: '나녕tablet',
         description: '나녕 공방 체험 키오스크',
         theme_color: '#2A2720',
         background_color: '#FAF8F2',
