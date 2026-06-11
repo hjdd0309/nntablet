@@ -9,6 +9,7 @@ export default function PhotoPromptOverlay() {
   const [captured, setCaptured] = useState(null) // { url, blob } after snapshot
   const [uploading, setUploading] = useState(false)
   const [camError, setCamError] = useState(false)
+  const [facingMode, setFacingMode] = useState('environment')
 
   const videoRef = useRef(null)
   const canvasRef = useRef(null)
@@ -19,13 +20,14 @@ export default function PhotoPromptOverlay() {
     streamRef.current = null
   }, [])
 
-  const openCamera = async () => {
+  const openCamera = async (mode) => {
+    const fm = mode ?? facingMode
     setCamError(false)
     setCaptured(null)
     setCameraOpen(true)
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } },
+        video: { facingMode: fm, width: { ideal: 1920 }, height: { ideal: 1080 } },
         audio: false,
       })
       streamRef.current = stream
@@ -36,6 +38,13 @@ export default function PhotoPromptOverlay() {
     } catch {
       setCamError(true)
     }
+  }
+
+  const flipCamera = async () => {
+    const next = facingMode === 'environment' ? 'user' : 'environment'
+    setFacingMode(next)
+    stopStream()
+    await openCamera(next)
   }
 
   const takeSnapshot = () => {
@@ -137,11 +146,11 @@ export default function PhotoPromptOverlay() {
             <>
               <video ref={videoRef} style={s.videoFeed} playsInline muted autoPlay />
               <div style={s.camActions}>
-                <button style={s.btnSecondary} onClick={cancel}>취소</button>
+                <button style={s.cancelBtn} onClick={cancel}>취소</button>
                 <button style={s.shutterBtn} onClick={takeSnapshot}>
                   <div style={s.shutterInner} />
                 </button>
-                <div style={{ flex: 1 }} />
+                <button style={s.flipBtn} onClick={flipCamera}>🔄</button>
               </div>
             </>
           )}
@@ -236,6 +245,31 @@ const s = {
     fontFamily: 'var(--font)',
     marginTop: 8,
     width: '100%',
+  },
+  cancelBtn: {
+    padding: '10px 20px',
+    borderRadius: 30,
+    background: 'rgba(0,0,0,0.06)',
+    border: 'none',
+    fontSize: 15,
+    fontWeight: 600,
+    color: '#7A7570',
+    cursor: 'pointer',
+    fontFamily: 'var(--font)',
+    whiteSpace: 'nowrap',
+  },
+  flipBtn: {
+    width: 52,
+    height: 52,
+    borderRadius: '50%',
+    border: '1.5px solid rgba(42,39,32,0.2)',
+    background: 'rgba(255,255,255,0.8)',
+    fontSize: 22,
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
   },
   // camera modal
   cameraModal: {
