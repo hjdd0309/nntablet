@@ -14,19 +14,10 @@ const STEP_IMAGES = {
   7: '/스텝7.jpg',
 }
 
-const GLAZE_COLORS = [
-  { id: 'pink',   color: '#D4B8B0' },
-  { id: 'peach',  color: '#C8B8A8' },
-  { id: 'yellow', color: '#C0B8A0' },
-  { id: 'teal',   color: '#B0B8B8' },
-  { id: 'purple', color: '#B8B0C8' },
-]
-
 export default function CraftingPage() {
   const navigate = useNavigate()
   const t = useT()
   const [craftStep, setCraftStep] = useState(1)
-  const [selectedColor, setSelectedColor] = useState(null)
   const totalSteps = 7
 
   const handleNext = () => {
@@ -40,8 +31,6 @@ export default function CraftingPage() {
   const handlePrev = () => {
     setCraftStep(s => s - 1)
   }
-
-  const isColorStep = craftStep === 2
 
   return (
     <div style={styles.container}>
@@ -67,27 +56,13 @@ export default function CraftingPage() {
             <img src={STEP_IMAGES[craftStep]} alt={`step ${craftStep}`} style={styles.stepImg} />
           ) : null}
 
-          {/* 색상 선택 (스텝2) */}
-          {isColorStep && (
-            <div style={styles.colorOverlay}>
-              <div style={styles.colorRow}>
-                {GLAZE_COLORS.map((g, i) => (
-                  <div key={g.id} style={styles.colorItem}>
-                    {i === 0 && <span style={styles.colorBadge}>{t.craftBest}</span>}
-                    {i === 1 && <span style={styles.colorBadge}>{t.craftArtisanPick}</span>}
-                    {i > 1 && <span style={styles.colorBadgeEmpty} />}
-                    <button
-                      style={{
-                        ...styles.colorCircle,
-                        background: g.color,
-                        ...(selectedColor === g.id ? styles.colorCircleSelected : {}),
-                      }}
-                      onClick={() => setSelectedColor(g.id)}
-                    />
-                    <span style={styles.colorLabel}>color</span>
-                  </div>
-                ))}
-              </div>
+          {/* 스텝2 안내 문구 */}
+          {craftStep === 2 && (
+            <div style={styles.step2Notice}>
+              <p style={styles.step2NoticeText}>
+                색은 1가지 색만 가능합니다. 1가지만 골라주세요.<br />
+                색은 상황에 따라 없거나 추가되는 색이 있을 수 있습니다.
+              </p>
             </div>
           )}
 
@@ -147,82 +122,49 @@ const styles = {
     overflow: 'hidden',
   },
   stepImg: {
-    width: '100%',
-    height: '100%',
+    maxWidth: '70%',
+    maxHeight: '80%',
     objectFit: 'contain',
     display: 'block',
+    borderRadius: 16,
+    boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
   },
   multiImgRow: {
     display: 'flex',
-    gap: 8,
-    width: '100%',
-    height: '100%',
-    padding: 8,
+    gap: 12,
+    width: '90%',
+    height: '85%',
+    padding: 4,
     boxSizing: 'border-box',
   },
   stepImgMulti: {
     flex: 1,
     minWidth: 0,
     height: '100%',
-    objectFit: 'contain',
-    borderRadius: 10,
+    objectFit: 'cover',
+    borderRadius: 16,
+    boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
   },
-  colorOverlay: {
+  step2Notice: {
     position: 'absolute',
     bottom: 72,
-    left: 0,
-    right: 0,
-    display: 'flex',
-    justifyContent: 'center',
-    pointerEvents: 'none',
-  },
-  colorRow: {
-    display: 'flex',
-    gap: 24,
-    alignItems: 'flex-end',
-    justifyContent: 'center',
-    pointerEvents: 'auto',
-    background: 'rgba(250,248,242,0.85)',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    background: 'rgba(42,39,32,0.65)',
     backdropFilter: 'blur(6px)',
-    borderRadius: 20,
-    padding: '12px 24px',
-  },
-  colorItem: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: 12,
-  },
-  colorBadge: {
-    fontSize: 12,
-    fontWeight: 700,
-    color: '#2A2720',
-    fontFamily: 'var(--font)',
-    height: 18,
+    borderRadius: 14,
+    padding: '10px 20px',
+    pointerEvents: 'none',
     whiteSpace: 'nowrap',
   },
-  colorBadgeEmpty: {
-    height: 18,
-    display: 'block',
-  },
-  colorCircle: {
-    width: 120,
-    height: 120,
-    borderRadius: '50%',
-    border: '2px solid transparent',
-    cursor: 'pointer',
-    transition: 'transform 0.15s, border-color 0.15s',
-    boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
-  },
-  colorCircleSelected: {
-    border: '2px solid #2A2720',
-    transform: 'scale(1.08)',
-  },
-  colorLabel: {
-    fontSize: 14,
+  step2NoticeText: {
+    fontSize: 13,
     fontWeight: 600,
-    color: '#7A7570',
+    color: '#FAF8F2',
     fontFamily: 'var(--font)',
+    margin: 0,
+    textAlign: 'center',
+    lineHeight: 1.7,
   },
   nextBtn: {
     position: 'absolute',
