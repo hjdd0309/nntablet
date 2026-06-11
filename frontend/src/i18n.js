@@ -74,8 +74,6 @@ const translations = {
     stepChilboVideo: '칠보 영상',
     stepGallery: '갤러리 탐색',
     chilboVideoPlaceholder: '영상 파일을 /public/chilbo.mp4 경로에 넣어주세요',
-    stepChooseDesign: '디자인 선택',
-    stepSketching: '스케치',
     stepHandcrafting: '공예',
     stepSelectPackage: '패키지 선택',
     stepCompletion: '완성',
@@ -98,7 +96,6 @@ const translations = {
     takeAPhoto: '사진을 찍어주세요!',
 
     enamelTitle: '에나멜링',
-    craftProgressSteps: ['공예 선택', '개요', '디자인', '스케치', '작업 기록', '공예', '패키지', '완성'],
     craftSteps: [
       '구리판을 확인해주세요.',
       '유약 색상을 선택하세요',
@@ -210,8 +207,6 @@ const translations = {
     stepChilboVideo: 'Chilbo Video',
     stepGallery: 'Gallery',
     chilboVideoPlaceholder: 'Place your video file at /public/chilbo.mp4',
-    stepChooseDesign: 'Choose Design',
-    stepSketching: 'Sketching',
     stepHandcrafting: 'Crafting',
     stepSelectPackage: 'Select Package',
     stepCompletion: 'Completion',
@@ -234,7 +229,6 @@ const translations = {
     takeAPhoto: 'Take a photo!',
 
     enamelTitle: 'Enameling',
-    craftProgressSteps: ['Pick Craft', 'Overview', 'Design', 'Sketch', 'Process Log', 'Crafting', 'Package', 'Complete'],
     craftSteps: [
       'Check your copper plate.',
       'Choose your glaze color',

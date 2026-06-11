@@ -39,7 +39,7 @@ export default function ProcessResultPage() {
           <>
             <span style={styles.emptyIcon}>📭</span>
             <h1 style={styles.title}>기록이 없습니다</h1>
-            <p style={styles.sub}>촬영 기록을 남기려면 체험 시작 시<br />타임랩스 또는 사진 알림을 선택해주세요</p>
+            <p style={styles.sub}>촬영 기록을 남기려면 체험 시작 시<br />사진 알림을 선택해주세요</p>
           </>
         )}
       </div>

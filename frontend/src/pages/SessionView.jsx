@@ -64,34 +64,21 @@ export default function SessionView() {
       <div style={v.header}>
         <img src={logo} alt="나녕" style={v.logo} />
         <div>
-          <p style={v.subtitle}>
-            {session.mode === 'photos' ? '📷 체험 사진' : '🎬 타임랩스 영상'}
-          </p>
+          <p style={v.subtitle}>📷 체험 사진</p>
           <p style={v.date}>{new Date(session.created_at).toLocaleDateString('ko-KR')}</p>
         </div>
       </div>
 
-      {session.mode === 'photos' ? (
-        <div style={v.grid}>
-          {urls.map((url, i) => (
-            <div key={i} style={v.imgWrap}>
-              <img src={url} alt={`photo ${i + 1}`} style={v.img} onClick={() => setSelected(url)} />
-              <button style={v.saveBtn} onClick={() => saveImage(url, `nanyeong-${i + 1}.jpg`)}>
-                ↓ 저장
-              </button>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div style={v.videoWrap}>
-          <video
-          src={urls[0]}
-          controls
-          style={v.video}
-          onCanPlay={(e) => { e.target.playbackRate = 2 }}
-        />
-        </div>
-      )}
+      <div style={v.grid}>
+        {urls.map((url, i) => (
+          <div key={i} style={v.imgWrap}>
+            <img src={url} alt={`photo ${i + 1}`} style={v.img} onClick={() => setSelected(url)} />
+            <button style={v.saveBtn} onClick={() => saveImage(url, `nanyeong-${i + 1}.jpg`)}>
+              ↓ 저장
+            </button>
+          </div>
+        ))}
+      </div>
 
       {selected && (
         <div style={v.overlay} onClick={() => setSelected(null)}>
@@ -187,18 +174,6 @@ const v = {
     cursor: 'pointer',
     fontFamily: "'Nunito', sans-serif",
     boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-  },
-  videoWrap: {
-    padding: '24px',
-    display: 'flex',
-    justifyContent: 'center',
-  },
-  video: {
-    width: '100%',
-    maxWidth: 700,
-    borderRadius: 16,
-    boxShadow: '0 4px 24px rgba(0,0,0,0.12)',
-    background: '#000',
   },
   overlay: {
     position: 'fixed',

@@ -12,7 +12,7 @@ const LANG_MAP = {
   '汉语': '中文',
 }
 
-export default function Header({ showBack = true, showHome = false, showCall = false, showCamera = false, showVideo = false, backTo, onBack }) {
+export default function Header({ showBack = true, showHome = false, showCall = false, showVideo = false, backTo, onBack }) {
   const navigate = useNavigate()
   const { language, setShowHelpModal, recordMode, nextShotCountdown } = useApp()
   const t = useT()

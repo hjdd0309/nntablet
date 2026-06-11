@@ -36,7 +36,7 @@ export default function CraftingPage() {
   return (
     <div style={styles.container}>
       <div style={{ position: 'absolute', inset: 0, backgroundImage: 'url(/5_배경.png)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }} />
-      <Header showBack backTo="/sketch" showCall showCamera showHome />
+      <Header showBack backTo="/gallery" showCall showHome />
       <StepProgress currentStep={4} />
 
       <div style={styles.content}>
