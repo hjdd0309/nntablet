@@ -31,7 +31,7 @@ export default function ProcessResultPage() {
               <p style={styles.qrHint}>카메라로 QR을 스캔하세요</p>
             </div>
 
-            <button style={styles.viewBtn} onClick={() => navigate(`/view/${sessionToken}${selectedFrame ? `?frame=${selectedFrame}` : ''}`)}>
+            <button style={styles.viewBtn} onClick={() => navigate(`/view/${sessionToken}?from=app${selectedFrame ? `&frame=${selectedFrame}` : ''}`)}>
               여기서 바로 보기 →
             </button>
           </>

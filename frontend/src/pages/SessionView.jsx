@@ -8,6 +8,7 @@ export default function SessionView() {
   const { token } = useParams()
   const [searchParams] = useSearchParams()
   const frameId = searchParams.get('frame')
+  const fromApp = searchParams.get('from') === 'app'
   const navigate = useNavigate()
   const [session, setSession] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -81,7 +82,7 @@ export default function SessionView() {
     <div style={v.page}>
       <div ref={captureRef} style={v.captureWrapper}>
         <div style={v.header}>
-          <button style={v.backBtn} onClick={() => navigate(-1)}>‹ 뒤로</button>
+          {fromApp && <button style={v.backBtn} onClick={() => navigate(-1)}>‹ 뒤로</button>}
           <div style={v.headerCenter}>
             <img src={logo} alt="나녕" style={v.logo} />
           </div>
