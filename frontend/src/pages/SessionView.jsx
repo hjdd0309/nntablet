@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom'
 import html2canvas from 'html2canvas'
 import { supabase } from '../lib/supabase'
+import { useT } from '../i18n'
 import logo from '../assets/로고.png'
 
 export default function SessionView() {
@@ -9,6 +10,7 @@ export default function SessionView() {
   const [searchParams] = useSearchParams()
   const frameId = searchParams.get('frame')
   const fromApp = searchParams.get('from') === 'app'
+  const t = useT()
   const navigate = useNavigate()
   const [session, setSession] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -71,7 +73,7 @@ export default function SessionView() {
   if (error) return (
     <div style={v.page}>
       <div style={v.center}>
-        <p style={v.errorText}>{error}</p>
+        <p style={v.errorText}>{t.recordNotFound}</p>
       </div>
     </div>
   )
@@ -82,12 +84,12 @@ export default function SessionView() {
     <div style={v.page}>
       <div ref={captureRef} style={v.captureWrapper}>
         <div style={v.header}>
-          {fromApp && <button style={v.backBtn} onClick={() => navigate(-1)}>‹ 뒤로</button>}
+          {fromApp && <button style={v.backBtn} onClick={() => navigate(-1)}>‹ {t.back}</button>}
           <div style={v.headerCenter}>
             <img src={logo} alt="나녕" style={v.logo} />
           </div>
           <div style={v.headerRight}>
-            <p style={v.subtitle}>체험 사진</p>
+            <p style={v.subtitle}>{t.sessionPhotosLabel}</p>
             <p style={v.date}>{new Date(session.created_at).toLocaleDateString('ko-KR')}</p>
           </div>
         </div>
@@ -105,7 +107,7 @@ export default function SessionView() {
       </div>
 
       <button style={v.saveAllBtn} onClick={handleSaveAll} disabled={saving}>
-        {saving ? '저장 중...' : '↓ 전체 저장'}
+        {saving ? t.saving : t.saveAll}
       </button>
 
       {selected && (
@@ -122,10 +124,10 @@ export default function SessionView() {
 
 const v = {
   page: {
-    minHeight: '100vh',
+    height: '100%',
+    overflowY: 'auto',
     background: '#FAF8F2',
     fontFamily: "'Nunito', 'Apple SD Gothic Neo', sans-serif",
-    padding: '0 0 40px',
   },
   center: {
     display: 'flex',
@@ -220,15 +222,13 @@ const v = {
     borderRadius: 16,
     overflow: 'hidden',
     width: '100%',
-    aspectRatio: '4 / 3',
     boxShadow: '0 2px 12px rgba(0,0,0,0.10)',
     position: 'relative',
     cursor: 'pointer',
   },
   img: {
     width: '100%',
-    height: '100%',
-    objectFit: 'cover',
+    height: 'auto',
     display: 'block',
   },
   frameOverlay: {

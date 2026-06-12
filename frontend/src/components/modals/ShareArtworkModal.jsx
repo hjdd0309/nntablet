@@ -1,11 +1,13 @@
 import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import { useT } from '../../i18n'
 
 const generateId = () => Math.random().toString(36).substring(2, 10)
 
 export default function ShareArtworkModal({ onClose }) {
   const navigate = useNavigate()
+  const t = useT()
   const [step, setStep] = useState('capture') // 'capture' | 'preview' | 'uploading' | 'done'
   const [photoBlob, setPhotoBlob] = useState(null)
   const [photoUrl, setPhotoUrl] = useState(null)
@@ -31,7 +33,6 @@ export default function ShareArtworkModal({ onClose }) {
 
     const toDelete = rows.slice(0, rows.length - MAX)
 
-    // Storage 파일 삭제
     const storagePaths = toDelete
       .map(r => {
         try {
@@ -44,7 +45,6 @@ export default function ShareArtworkModal({ onClose }) {
       await supabase.storage.from('nntablet').remove(storagePaths)
     }
 
-    // DB row 삭제
     const ids = toDelete.map(r => r.id)
     await supabase.from('gallery').delete().in('id', ids)
   }
@@ -70,13 +70,12 @@ export default function ShareArtworkModal({ onClose }) {
       })
       if (dbErr) throw dbErr
 
-      // 200개 초과분 정리 (실패해도 업로드 성공으로 처리)
       pruneGallery().catch(console.error)
 
       setStep('done')
     } catch (e) {
       console.error('Upload error:', e)
-      alert('업로드 실패: ' + e.message)
+      alert('Upload failed: ' + e.message)
       setStep('preview')
     }
   }
@@ -90,16 +89,15 @@ export default function ShareArtworkModal({ onClose }) {
           {step === 'preview' && (
             <button style={m.backBtn} onClick={() => { setStep('capture'); setPhotoUrl(null); setPhotoBlob(null) }}>‹</button>
           )}
-          <span style={m.title}>내 작품 공유하기</span>
+          <span style={m.title}>{t.shareModalTitle}</span>
           <button style={m.closeBtn} onClick={onClose}>✕</button>
         </div>
 
         {/* ── Step: capture ── */}
         {step === 'capture' && (
           <>
-            <p style={m.subtitle}>완성된 작품을 촬영해주세요</p>
+            <p style={m.subtitle}>{t.shareCaptureSub}</p>
 
-            {/* Hidden native camera input */}
             <input
               ref={fileInputRef}
               type="file"
@@ -111,14 +109,14 @@ export default function ShareArtworkModal({ onClose }) {
 
             <div style={m.captureCard}>
               <span style={m.cameraIcon}>📷</span>
-              <p style={m.captureLabel}>카메라로 작품을 찍어주세요</p>
-              <p style={m.captureSub}>버튼을 누르면 카메라가 열려요</p>
+              <p style={m.captureLabel}>{t.shareCaptureLabel}</p>
+              <p style={m.captureSub}>{t.shareCaptureSub2}</p>
             </div>
 
             <div style={m.btnRow}>
-              <button style={m.btnSecondary} onClick={onClose}>다음에 할게요</button>
+              <button style={m.btnSecondary} onClick={onClose}>{t.shareLater}</button>
               <button style={m.btnSnap} onClick={() => fileInputRef.current?.click()}>
-                📷 촬영하기
+                {t.shareTakePhoto}
               </button>
             </div>
           </>
@@ -128,24 +126,24 @@ export default function ShareArtworkModal({ onClose }) {
         {step === 'preview' && (
           <div style={m.previewRow}>
             <div style={m.previewImgWrap}>
-              <img src={photoUrl} alt="작품" style={m.previewImg} />
+              <img src={photoUrl} alt="artwork" style={m.previewImg} />
             </div>
             <div style={m.previewForm}>
-              <p style={m.formLabel}>아이디를 입력해주세요</p>
-              <p style={m.formSub}>익명으로 올려도 괜찮아요 :)</p>
+              <p style={m.formLabel}>{t.shareUsernameLabel}</p>
+              <p style={m.formSub}>{t.shareUsernameSub}</p>
               <input
                 style={m.input}
                 type="text"
-                placeholder="닉네임 입력..."
+                placeholder={t.shareUsernamePlaceholder}
                 value={username}
                 onChange={e => setUsername(e.target.value)}
                 maxLength={20}
               />
               <button style={m.anonBtn} onClick={() => setUsername('익명')}>
-                익명으로 올리기
+                {t.shareAnon}
               </button>
               <button style={m.btnPrimary} onClick={handleUpload}>
-                갤러리에 올리기 🎨
+                {t.shareUpload}
               </button>
             </div>
           </div>
@@ -155,7 +153,7 @@ export default function ShareArtworkModal({ onClose }) {
         {step === 'uploading' && (
           <div style={m.centerState}>
             <div className="spinner" style={{ width: 36, height: 36, borderWidth: 4 }} />
-            <p style={m.stateText}>올리는 중...</p>
+            <p style={m.stateText}>{t.shareUploading}</p>
           </div>
         )}
 
@@ -163,12 +161,12 @@ export default function ShareArtworkModal({ onClose }) {
         {step === 'done' && (
           <div style={m.centerState}>
             <span style={m.doneIcon}>🎉</span>
-            <p style={m.stateText}>갤러리에 올라갔어요!</p>
-            <p style={m.stateSub}>갤러리에서 내 작품을 확인해보세요</p>
+            <p style={m.stateText}>{t.shareDoneText}</p>
+            <p style={m.stateSub}>{t.shareDoneSub}</p>
             <div style={m.btnRow}>
-              <button style={m.btnSecondary} onClick={onClose}>닫기</button>
+              <button style={m.btnSecondary} onClick={onClose}>{t.close}</button>
               <button style={m.btnPrimary} onClick={() => { onClose(); navigate('/gallery', { state: { fromShare: true } }) }}>
-                갤러리 보기 →
+                {t.shareViewGallery}
               </button>
             </div>
           </div>

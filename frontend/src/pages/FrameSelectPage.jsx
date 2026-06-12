@@ -1,12 +1,14 @@
 import { useNavigate } from 'react-router-dom'
 import Header from '../components/Header'
 import { useApp } from '../context/AppContext'
+import { useT } from '../i18n'
 
 const FRAMES = [1, 2, 3, 4, 5]
 
 export default function FrameSelectPage() {
   const navigate = useNavigate()
   const { selectedFrame, setSelectedFrame } = useApp()
+  const t = useT()
 
   return (
     <div style={s.container}>
@@ -14,8 +16,8 @@ export default function FrameSelectPage() {
       <Header showBack backTo="/completion" showCall showHome />
 
       <div style={s.content}>
-        <h1 style={s.title}>프레임을 골라주세요</h1>
-        <p style={s.sub}>선택한 프레임이 사진 위에 적용돼요</p>
+        <h1 style={s.title}>{t.frameSelectTitle}</h1>
+        <p style={s.sub}>{t.frameSelectSub}</p>
 
         <div style={s.frameRow}>
           {FRAMES.map(n => (
@@ -49,7 +51,7 @@ export default function FrameSelectPage() {
           style={{ ...s.nextBtn, ...(selectedFrame ? {} : s.nextBtnDisabled) }}
           onClick={() => selectedFrame && navigate('/process-result')}
         >
-          다음 →
+          {t.frameSelectNext}
         </button>
       </div>
     </div>

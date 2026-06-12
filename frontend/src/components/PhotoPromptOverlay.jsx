@@ -1,9 +1,11 @@
 import { useRef, useState, useEffect, useCallback } from 'react'
 import { useApp } from '../context/AppContext'
+import { useT } from '../i18n'
 import { supabase } from '../lib/supabase'
 
 export default function PhotoPromptOverlay() {
   const { recordMode, showPhotoPrompt, sessionToken, addSessionPhoto, dismissPhotoPrompt } = useApp()
+  const t = useT()
 
   const [cameraOpen, setCameraOpen] = useState(false)
   const [captured, setCaptured] = useState(null) // { url, blob } after snapshot
@@ -129,16 +131,16 @@ export default function PhotoPromptOverlay() {
         <div style={s.cameraModal}>
           {camError ? (
             <div style={s.camError}>
-              <p style={s.camErrorText}>카메라를 사용할 수 없어요</p>
-              <button style={s.btnSecondary} onClick={cancel}>닫기</button>
+              <p style={s.camErrorText}>{t.camError}</p>
+              <button style={s.btnSecondary} onClick={cancel}>{t.close}</button>
             </div>
           ) : captured ? (
             <>
               <img src={captured.url} alt="preview" style={s.preview} />
               <div style={s.camActions}>
-                <button style={s.btnSecondary} onClick={retake}>다시 찍기</button>
+                <button style={s.btnSecondary} onClick={retake}>{t.retake}</button>
                 <button style={s.btnPrimary} onClick={confirmPhoto} disabled={uploading}>
-                  {uploading ? '저장 중...' : '사용하기'}
+                  {uploading ? t.saving : t.usePhoto}
                 </button>
               </div>
             </>
@@ -146,7 +148,7 @@ export default function PhotoPromptOverlay() {
             <>
               <video ref={videoRef} style={s.videoFeed} playsInline muted autoPlay />
               <div style={s.camActions}>
-                <button style={s.cancelBtn} onClick={cancel}>취소</button>
+                <button style={s.cancelBtn} onClick={cancel}>{t.cancel}</button>
                 <button style={s.shutterBtn} onClick={takeSnapshot}>
                   <div style={s.shutterInner} />
                 </button>
@@ -161,17 +163,17 @@ export default function PhotoPromptOverlay() {
 
           {recordMode === 'auto' ? (
             <>
-              <p style={s.title}>촬영 시간이에요!</p>
-              <p style={s.sub}>카메라가 열립니다</p>
-              <button style={s.btnPrimary} onClick={openCamera}>지금 찍기</button>
+              <p style={s.title}>{t.photoTimeTitle}</p>
+              <p style={s.sub}>{t.photoTimeSub}</p>
+              <button style={s.btnPrimary} onClick={openCamera}>{t.photoTakeNow}</button>
             </>
           ) : (
             <>
-              <p style={s.title}>사진을 찍을까요?</p>
-              <p style={s.sub}>5분이 지났어요</p>
+              <p style={s.title}>{t.photoPromptTitle}</p>
+              <p style={s.sub}>{t.photoPromptSub}</p>
               <div style={s.btnRow}>
-                <button style={s.btnSecondary} onClick={dismissPhotoPrompt}>건너뛰기</button>
-                <button style={s.btnPrimary} onClick={openCamera}>찍기</button>
+                <button style={s.btnSecondary} onClick={dismissPhotoPrompt}>{t.skip}</button>
+                <button style={s.btnPrimary} onClick={openCamera}>{t.shoot}</button>
               </div>
             </>
           )}
@@ -271,7 +273,6 @@ const s = {
     justifyContent: 'center',
     flexShrink: 0,
   },
-  // camera modal
   cameraModal: {
     width: '80vw',
     maxWidth: 900,

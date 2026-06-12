@@ -22,24 +22,24 @@ export default function ProcessResultPage() {
         {qrUrl ? (
           <>
             <h1 style={styles.title}>{t.processHistory}</h1>
-            <p style={styles.sub}>QR 코드를 스캔하면 제작 과정을 볼 수 있어요</p>
+            <p style={styles.sub}>{t.qrScanSub}</p>
 
             <div style={styles.qrCard}>
               <div style={styles.qrBox}>
                 <QRCodeSVG value={qrUrl} size={200} bgColor="transparent" fgColor="#2A2720" />
               </div>
-              <p style={styles.qrHint}>카메라로 QR을 스캔하세요</p>
+              <p style={styles.qrHint}>{t.qrScanHint}</p>
             </div>
 
             <button style={styles.viewBtn} onClick={() => navigate(`/view/${sessionToken}?from=app${selectedFrame ? `&frame=${selectedFrame}` : ''}`)}>
-              여기서 바로 보기 →
+              {t.viewHere}
             </button>
           </>
         ) : (
           <>
             <span style={styles.emptyIcon}>📭</span>
-            <h1 style={styles.title}>기록이 없습니다</h1>
-            <p style={styles.sub}>촬영 기록을 남기려면 체험 시작 시<br />사진 알림을 선택해주세요</p>
+            <h1 style={styles.title}>{t.noRecord}</h1>
+            <p style={styles.sub}>{t.noRecordSub.split('\n').map((line, i) => <span key={i}>{i > 0 && <br />}{line}</span>)}</p>
           </>
         )}
       </div>
