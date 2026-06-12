@@ -34,44 +34,26 @@ export default function AskForHelpModal({ onClose }) {
   const [ownerMicResult, setOwnerMicResult] = useState('')
   const [ownerMicLoading, setOwnerMicLoading] = useState(false)
   const recRef = useRef(null)
-  const audioCtxRef = useRef(null)
-  const analyserRef = useRef(null)
-  const streamRef = useRef(null)
   const animFrameRef = useRef(null)
 
   useEffect(() => {
-    return () => {
-      cancelAnimationFrame(animFrameRef.current)
-      streamRef.current?.getTracks().forEach(t => t.stop())
-      audioCtxRef.current?.close()
-    }
+    return () => cancelAnimationFrame(animFrameRef.current)
   }, [])
 
-  const startVisualization = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      streamRef.current = stream
-      const ctx = new AudioContext()
-      audioCtxRef.current = ctx
-      const analyser = ctx.createAnalyser()
-      analyser.fftSize = 64
-      analyserRef.current = analyser
-      ctx.createMediaStreamSource(stream).connect(analyser)
-      const data = new Uint8Array(analyser.frequencyBinCount)
-      const tick = () => {
-        analyser.getByteFrequencyData(data)
-        setBars(Array.from(data).slice(0, 24).map(v => v / 255))
-        animFrameRef.current = requestAnimationFrame(tick)
-      }
-      tick()
-    } catch {}
+  const startVisualization = () => {
+    let t = 0
+    const tick = () => {
+      t += 0.12
+      setBars(Array.from({ length: 24 }, (_, i) =>
+        Math.abs(Math.sin(t + i * 0.35)) * 0.65 + Math.random() * 0.35
+      ))
+      animFrameRef.current = requestAnimationFrame(tick)
+    }
+    tick()
   }
 
   const stopVisualization = () => {
     cancelAnimationFrame(animFrameRef.current)
-    streamRef.current?.getTracks().forEach(t => t.stop())
-    audioCtxRef.current?.close()
-    audioCtxRef.current = null
     setBars(Array(24).fill(0))
   }
 
@@ -97,10 +79,18 @@ export default function AskForHelpModal({ onClose }) {
     rec.onerror = (e) => {
       setIsListening(false)
       stopVisualization()
-      if (e.error === 'not-allowed') setError('마이크 권한이 필요해요. 브라우저 주소창 왼쪽 자물쇠 아이콘 → 마이크 허용 후 다시 시도해주세요.')
-      else if (e.error === 'no-speech') setError('음성이 감지되지 않았어요. 조금 더 크게 말하거나 아래 텍스트로 직접 입력해주세요.')
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone
+      if (e.error === 'not-allowed') {
+        setError(isStandalone
+          ? '마이크 권한이 필요해요. Android 설정 → 앱 → Chrome → 권한 → 마이크를 허용한 뒤 앱을 다시 시작해주세요.'
+          : '마이크 권한이 필요해요. 브라우저 주소창 왼쪽 자물쇠 아이콘 → 마이크 허용 후 다시 시도해주세요.'
+        )
+      } else if (e.error === 'no-speech') setError('음성이 감지되지 않았어요. 조금 더 크게 말하거나 아래 텍스트로 직접 입력해주세요.')
       else if (e.error === 'network') setError('음성 인식 네트워크 오류예요. 인터넷 연결을 확인하거나 아래에 직접 입력해주세요.')
-      else if (e.error === 'service-not-allowed') setError('이 환경에서는 음성 인식이 지원되지 않아요. 아래 텍스트 입력란에 직접 써주세요.')
+      else if (e.error === 'service-not-allowed') setError(isStandalone
+        ? '앱 모드에서 마이크 권한을 인식 못 했어요. Android 설정 → 앱 → Chrome → 권한 → 마이크 허용 후 다시 시도해주세요.'
+        : '이 환경에서는 음성 인식이 지원되지 않아요. 아래 텍스트 입력란에 직접 써주세요.'
+      )
       else setError('음성 인식 오류: ' + e.error + ' — 아래에 직접 입력해주세요.')
     }
     rec.onend = () => { setIsListening(false); stopVisualization() }
