@@ -34,54 +34,26 @@ export default function AskForHelpModal({ onClose }) {
   const [ownerMicResult, setOwnerMicResult] = useState('')
   const [ownerMicLoading, setOwnerMicLoading] = useState(false)
   const recRef = useRef(null)
-  const audioCtxRef = useRef(null)
-  const analyserRef = useRef(null)
-  const streamRef = useRef(null)
   const animFrameRef = useRef(null)
 
   useEffect(() => {
-    return () => {
-      cancelAnimationFrame(animFrameRef.current)
-      streamRef.current?.getTracks().forEach(t => t.stop())
-      audioCtxRef.current?.close()
-    }
+    return () => cancelAnimationFrame(animFrameRef.current)
   }, [])
 
-  const startVisualization = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      streamRef.current = stream
-      const ctx = new AudioContext()
-      audioCtxRef.current = ctx
-      const analyser = ctx.createAnalyser()
-      analyser.fftSize = 64
-      analyserRef.current = analyser
-      ctx.createMediaStreamSource(stream).connect(analyser)
-      const data = new Uint8Array(analyser.frequencyBinCount)
-      const tick = () => {
-        analyser.getByteFrequencyData(data)
-        setBars(Array.from(data).slice(0, 24).map(v => v / 255))
-        animFrameRef.current = requestAnimationFrame(tick)
-      }
-      tick()
-    } catch {
-      let t = 0
-      const tick = () => {
-        t += 0.12
-        setBars(Array.from({ length: 24 }, (_, i) =>
-          Math.abs(Math.sin(t + i * 0.35)) * 0.65 + Math.random() * 0.35
-        ))
-        animFrameRef.current = requestAnimationFrame(tick)
-      }
-      tick()
+  const startVisualization = () => {
+    let t = 0
+    const tick = () => {
+      t += 0.12
+      setBars(Array.from({ length: 24 }, (_, i) =>
+        Math.abs(Math.sin(t + i * 0.35)) * 0.65 + Math.random() * 0.35
+      ))
+      animFrameRef.current = requestAnimationFrame(tick)
     }
+    tick()
   }
 
   const stopVisualization = () => {
     cancelAnimationFrame(animFrameRef.current)
-    streamRef.current?.getTracks().forEach(t => t.stop())
-    audioCtxRef.current?.close()
-    audioCtxRef.current = null
     setBars(Array(24).fill(0))
   }
 
@@ -97,7 +69,6 @@ export default function AskForHelpModal({ onClose }) {
     rec.lang = cfg.speech
     rec.continuous = false
     rec.interimResults = false
-    rec.onstart = () => startVisualization()
     rec.onresult = (e) => {
       const transcript = e.results[0][0].transcript
       if (onResult) onResult(transcript)
@@ -126,6 +97,7 @@ export default function AskForHelpModal({ onClose }) {
     recRef.current = rec
     rec.start()
     setIsListening(true)
+    startVisualization()
   }
 
   const handleOwnerMic = () => {
