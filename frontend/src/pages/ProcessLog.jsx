@@ -9,12 +9,7 @@ const generateToken = () => Math.random().toString(36).substring(2, 10)
 
 export default function ProcessLog() {
   const navigate = useNavigate()
-  const { setSessionToken, startRecording, stopRecording, recordMode, nextShotCountdown } = useApp()
-
-  const fmtCountdown = (s) => {
-    if (s === null) return ''
-    return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`
-  }
+  const { setSessionToken, startRecording, stopRecording } = useApp()
   const t = useT()
 
   const handleRecord = async (recMode) => {
@@ -41,15 +36,9 @@ export default function ProcessLog() {
 
       <div style={styles.content}>
         <div style={styles.splitLayout}>
-          {/* 왼쪽: 빈 공간 (촬영 중이면 타이머 표시) */}
+          {/* 왼쪽: 기록사진 카드 */}
           <div style={styles.placeholder}>
-            {recordMode && nextShotCountdown !== null ? (
-              <div style={styles.timerInner}>
-                <span style={styles.timerCamIcon}>📷</span>
-                <span style={styles.timerLabel}>{t.nextShotLabel}</span>
-                <span style={styles.timerCountdown}>{fmtCountdown(nextShotCountdown)}</span>
-              </div>
-            ) : null}
+            <img src="/기록사진.png" alt="기록 사진" style={styles.recordImg} />
           </div>
 
           {/* 오른쪽: 3버튼 */}
@@ -118,31 +107,16 @@ const styles = {
   placeholder: {
     flex: 1.5,
     borderRadius: 16,
-    background: 'rgba(255,255,255,0.25)',
-    border: '1.5px dashed rgba(42,39,32,0.12)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
+    overflow: 'hidden',
+    position: 'relative',
+    boxShadow: '0 2px 16px rgba(0,0,0,0.08)',
   },
-  timerInner: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  timerCamIcon: {
-    fontSize: 28,
-  },
-  timerCountdown: {
-    fontSize: 20,
-    fontWeight: 700,
-    color: '#2A2720',
-    fontFamily: 'var(--font)',
-  },
-  timerLabel: {
-    fontSize: 14,
-    color: '#7A7570',
-    fontFamily: 'var(--font)',
+  recordImg: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
+    display: 'block',
+    borderRadius: 16,
   },
   promptCard: {
     flex: 1,
@@ -152,24 +126,25 @@ const styles = {
     padding: '20px',
     display: 'flex',
     flexDirection: 'column',
+    justifyContent: 'center',
     gap: 10,
     boxShadow: '0 2px 16px rgba(0,0,0,0.06)',
     border: '1px solid rgba(255,255,255,0.8)',
   },
   promptTitle: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: 700,
     color: '#2A2720',
     fontFamily: 'var(--font)',
   },
   promptSub: {
-    fontSize: 13,
+    fontSize: 15,
     color: '#7A7570',
     fontFamily: 'var(--font)',
     lineHeight: 1.5,
   },
   btnGroup: {
-    marginTop: 'auto',
+    marginTop: 20,
     display: 'flex',
     flexDirection: 'column',
     gap: 8,

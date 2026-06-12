@@ -78,6 +78,14 @@ const translations = {
     stepSelectPackage: '패키지 선택',
     stepCompletion: '완성',
 
+    basicPackageTitle: '기본 패키지',
+    basicPackageDesc: '완성된 작품을 소중히 담아가는\n기본 포장 패키지',
+    basicPackageItems: ['작품 보호 케이스', '기본 포장지', '작품 라벨'],
+    specialPackageTitle: '특별 패키지',
+    specialPackageDesc: '작품을 더욱 특별하게 선물할 수 있는\n프리미엄 포장 패키지',
+    specialPackageItems: ['고급 선물 박스', '리본 포장', '작품 카드', '작품 보호 케이스'],
+    selectPackageBtn: '이 패키지 선택하기',
+
     prepareYourDesign: '디자인을 준비해주세요',
     checkYourDesign: '디자인 확인',
     isDesignReady: '디자인이 완성됐나요?',
@@ -92,7 +100,7 @@ const translations = {
     recordAutomatic: '좋아요, 5분 마다 자동으로 찍어주세요',
     recordWithAlert: '좋아요, 5분 마다 알림 보내주시고 수락하면 찍어주세요',
     takeProgressPhotos: '과정 사진 찍기',
-    photoReminderSub: '5분마다 사진 알림을 받아보세요',
+    photoReminderSub: '작업 과정을 사진으로 기록해 소중한 추억으로 남겨보세요.',
     takeAPhoto: '사진을 찍어주세요!',
 
     colorNotice: '색은 1가지 색만 가능합니다, 1가지만 골라주세요. 색은 상황에 따라 없거나 추가되는 색이 있을 수 있습니다.',
@@ -258,6 +266,14 @@ const translations = {
     stepSelectPackage: 'Select Package',
     stepCompletion: 'Completion',
 
+    basicPackageTitle: 'Basic Package',
+    basicPackageDesc: 'A simple and neat packaging\nto carry your finished piece.',
+    basicPackageItems: ['Protective case', 'Basic wrapping', 'Artwork label'],
+    specialPackageTitle: 'Special Package',
+    specialPackageDesc: 'A premium packaging to gift\nyour piece in style.',
+    specialPackageItems: ['Premium gift box', 'Ribbon wrapping', 'Artwork card', 'Protective case'],
+    selectPackageBtn: 'Select this package',
+
     prepareYourDesign: 'Prepare your design',
     checkYourDesign: 'Check your design',
     isDesignReady: 'Is your design ready?',
@@ -272,7 +288,7 @@ const translations = {
     recordAutomatic: 'Yes, take one automatically every 5 minutes',
     recordWithAlert: 'Yes, send me an alert every 5 minutes and I\'ll approve',
     takeProgressPhotos: 'Take progress photos',
-    photoReminderSub: 'Get a photo reminder every 5 minutes',
+    photoReminderSub: 'Capture your craft process in photos and create precious memories.',
     takeAPhoto: 'Take a photo!',
 
     colorNotice: 'Only one color is allowed. Please choose just one. Available colors may vary depending on the situation.',
