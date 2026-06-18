@@ -1,16 +1,19 @@
+import { useNavigate } from 'react-router-dom'
 import { useT } from '../i18n'
+
+const STEPS = [
+  { labelKey: 'stepOverview',      route: '/overview' },
+  { labelKey: 'stepProcessLog',    route: '/process-log' },
+  { labelKey: 'stepChilboVideo',   route: '/choose-design' },
+  { labelKey: 'stepGallery',       route: '/gallery' },
+  { labelKey: 'stepHandcrafting',  route: '/crafting' },
+  { labelKey: 'stepSelectPackage', route: '/package' },
+  { labelKey: 'stepCompletion',    route: '/completion' },
+]
 
 export default function StepProgress({ currentStep = 0 }) {
   const t = useT()
-  const STEPS = [
-    { labelKey: 'stepOverview' },
-    { labelKey: 'stepProcessLog' },
-    { labelKey: 'stepChilboVideo' },
-    { labelKey: 'stepGallery' },
-    { labelKey: 'stepHandcrafting' },
-    { labelKey: 'stepSelectPackage' },
-    { labelKey: 'stepCompletion' },
-  ]
+  const navigate = useNavigate()
 
   return (
     <div style={styles.container}>
@@ -20,7 +23,15 @@ export default function StepProgress({ currentStep = 0 }) {
         const isSelected = isActive || isPast
         const imgSrc = isSelected ? `/${idx + 1}.png` : `/${idx + 1}_.png`
         return (
-          <div key={step.labelKey} style={styles.step}>
+          <button
+            key={step.labelKey}
+            className="step-btn"
+            style={{
+              ...styles.step,
+              ...(isActive ? styles.stepActive : {}),
+            }}
+            onClick={() => navigate(step.route, { state: { fromFlow: true } })}
+          >
             <div style={{
               ...styles.icon,
               ...(isActive ? styles.iconActive : {}),
@@ -35,7 +46,7 @@ export default function StepProgress({ currentStep = 0 }) {
             }}>
               {t[step.labelKey]}
             </span>
-          </div>
+          </button>
         )
       })}
     </div>
@@ -58,6 +69,14 @@ const styles = {
     gap: 6,
     padding: '0 14px',
     position: 'relative',
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    borderRadius: 12,
+    transition: 'background 0.15s',
+  },
+  stepActive: {
+    borderBottom: '2px solid #ADA9A4',
   },
   icon: {
     width: 44,

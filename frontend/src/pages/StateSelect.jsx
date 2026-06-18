@@ -24,7 +24,7 @@ export default function StateSelect() {
       <h1 style={styles.title}>{t.chooseState}</h1>
 
       <div style={styles.cardRow}>
-        <button style={styles.card} onClick={() => navigate('/workshops')}>
+        <button style={styles.card} onClick={() => navigate('/workshops', { state: { explore: true } })}>
           <span style={styles.arrow}>→</span>
           <span style={styles.label}>{t.imWaiting}</span>
         </button>

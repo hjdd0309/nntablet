@@ -35,7 +35,8 @@ export default function CraftingPage() {
   return (
     <div style={styles.container}>
       <div style={{ position: 'absolute', inset: 0, backgroundImage: 'url(/5_배경.png)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }} />
-      <Header showBack backTo="/gallery" showCall showHome />
+      <Header showBack showCall showHome />
+      <h1 style={styles.flowTitle}>{t.craftingFlowTitle}</h1>
       <StepProgress currentStep={4} />
 
       <div style={styles.content}>
@@ -98,6 +99,17 @@ const styles = {
     flexDirection: 'column',
     position: 'relative',
     overflow: 'hidden',
+  },
+  flowTitle: {
+    fontSize: 32,
+    fontWeight: 700,
+    color: '#2A2720',
+    fontFamily: 'var(--font)',
+    textAlign: 'center',
+    padding: '20px 32px 0',
+    zIndex: 2,
+    position: 'relative',
+    flexShrink: 0,
   },
   content: {
     flex: 1,

@@ -66,7 +66,8 @@ export default function Gallery() {
   return (
     <div style={styles.container}>
       <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(${bgImage})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }} />
-      <Header showBack showCall showHome />
+      <Header showBack showCall showHome backTo={fromFlow ? undefined : '/overview'} />
+      {fromFlow && <h1 style={styles.flowTitle}>{t.galleryFlowTitle}</h1>}
       {fromFlow && <StepProgress currentStep={3} />}
 
       <div style={styles.pageHeader}>
@@ -205,6 +206,17 @@ const styles = {
     flexDirection: 'column',
     position: 'relative',
     overflow: 'hidden',
+  },
+  flowTitle: {
+    fontSize: 32,
+    fontWeight: 700,
+    color: '#2A2720',
+    fontFamily: 'var(--font)',
+    textAlign: 'center',
+    padding: '20px 32px 0',
+    zIndex: 2,
+    position: 'relative',
+    flexShrink: 0,
   },
   pageHeader: {
     display: 'flex',

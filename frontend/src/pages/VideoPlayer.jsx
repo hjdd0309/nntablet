@@ -28,36 +28,36 @@ export default function VideoPlayer() {
       <h1 style={styles.title}>{t.stepChilboVideo}</h1>
       <StepProgress currentStep={2} />
 
-      <div style={styles.content}>
-        <div style={styles.videoCard}>
-          {error ? (
-            <div style={styles.placeholder}>
-              <span style={styles.placeholderIcon}>🎬</span>
-              <p style={styles.placeholderText}>{t.chilboVideoPlaceholder}</p>
-            </div>
-          ) : (
-            <div style={styles.videoWrap} onClick={toggle}>
-              <video
-                ref={videoRef}
-                src={VIDEO_SRC}
-                style={styles.video}
-                playsInline
-                onError={() => setError(true)}
-                onEnded={() => { setPlaying(false); setEnded(true) }}
-                onPlay={() => setPlaying(true)}
-                onPause={() => setPlaying(false)}
-              />
-              {!playing && (
-                <div style={styles.playOverlay}>
-                  <div style={styles.playBtn}>
-                    <span style={styles.playIcon}>{ended ? '↺' : '▶'}</span>
-                  </div>
+      <div style={styles.videoArea} onClick={toggle}>
+        {error ? (
+          <div style={styles.placeholder}>
+            <span style={styles.placeholderIcon}>🎬</span>
+            <p style={styles.placeholderText}>{t.chilboVideoPlaceholder}</p>
+          </div>
+        ) : (
+          <>
+            <video
+              ref={videoRef}
+              src={VIDEO_SRC}
+              style={styles.video}
+              playsInline
+              onError={() => setError(true)}
+              onEnded={() => { setPlaying(false); setEnded(true) }}
+              onPlay={() => setPlaying(true)}
+              onPause={() => setPlaying(false)}
+            />
+            {!playing && (
+              <div style={styles.playOverlay}>
+                <div style={styles.playBtn}>
+                  <span style={styles.playIcon}>{ended ? '↺' : '▶'}</span>
                 </div>
-              )}
-            </div>
-          )}
-        </div>
+              </div>
+            )}
+          </>
+        )}
+      </div>
 
+      <div style={styles.nextWrap}>
         <button style={styles.nextBtn} onClick={() => navigate('/gallery', { state: { fromFlow: true } })}>
           {t.exploreToGallery} →
         </button>
@@ -88,40 +88,20 @@ const styles = {
     position: 'relative',
     flexShrink: 0,
   },
-  content: {
+  videoArea: {
     flex: 1,
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '0 60px 24px',
-    gap: 20,
-    zIndex: 2,
-    overflow: 'hidden',
-  },
-  videoCard: {
-    width: '100%',
-    maxWidth: 860,
-    borderRadius: 24,
-    overflow: 'hidden',
-    boxShadow: '0 4px 32px rgba(0,0,0,0.12)',
-    background: '#1a1814',
-    aspectRatio: '16 / 9',
-    flexShrink: 0,
-  },
-  videoWrap: {
-    width: '100%',
-    height: '100%',
     position: 'relative',
     cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
+    overflow: 'hidden',
+    background: '#1a1814',
+    zIndex: 2,
   },
   video: {
+    position: 'absolute',
+    inset: 0,
     width: '100%',
     height: '100%',
-    objectFit: 'contain',
+    objectFit: 'cover',
     display: 'block',
   },
   playOverlay: {
@@ -166,16 +146,22 @@ const styles = {
     fontFamily: 'var(--font)',
     textAlign: 'center',
   },
+  nextWrap: {
+    position: 'absolute',
+    bottom: 16,
+    right: 28,
+    zIndex: 10,
+  },
   nextBtn: {
-    padding: '14px 36px',
+    padding: '12px 32px',
     borderRadius: 30,
-    background: 'linear-gradient(135deg, #F8CB7F 0%, #E8924E 100%)',
-    border: 'none',
-    fontSize: 16,
+    background: 'rgba(255,255,255,0.92)',
+    border: '1px solid rgba(0,0,0,0.1)',
+    fontSize: 15,
     fontWeight: 700,
     color: '#2A2720',
     cursor: 'pointer',
     fontFamily: 'var(--font)',
-    flexShrink: 0,
+    boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
   },
 }

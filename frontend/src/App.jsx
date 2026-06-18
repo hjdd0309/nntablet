@@ -9,7 +9,7 @@ import StateSelect from './pages/StateSelect'
 import WorkshopSelect from './pages/WorkshopSelect'
 import WorkshopOverview from './pages/WorkshopOverview'
 import InformationPage from './pages/InformationPage'
-import ChooseDesign from './pages/ChooseDesign'
+import ChilboVideo from './pages/ChilboVideo'
 import SketchingPage from './pages/SketchingPage'
 import ProcessLog from './pages/ProcessLog'
 import CraftingPage from './pages/CraftingPage'
@@ -36,7 +36,7 @@ function AppRoutes() {
           <Route path="/workshops" element={<WorkshopSelect />} />
           <Route path="/overview" element={<WorkshopOverview />} />
           <Route path="/info" element={<InformationPage />} />
-          <Route path="/choose-design" element={<ChooseDesign />} />
+          <Route path="/choose-design" element={<ChilboVideo />} />
           <Route path="/sketch" element={<SketchingPage />} />
           <Route path="/process-log" element={<ProcessLog />} />
           <Route path="/crafting" element={<CraftingPage />} />

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { useT } from '../i18n'
 import logo from '../assets/로고.png'
@@ -12,8 +12,19 @@ const LANG_MAP = {
   '汉语': '中文',
 }
 
+const STEP_ROUTES = [
+  '/overview',
+  '/process-log',
+  '/choose-design',
+  '/gallery',
+  '/crafting',
+  '/package',
+  '/completion',
+]
+
 export default function Header({ showBack = true, showHome = false, showCall = false, showVideo = false, backTo, onBack }) {
   const navigate = useNavigate()
+  const location = useLocation()
   const { language, setShowHelpModal, recordMode, nextShotCountdown } = useApp()
   const t = useT()
   const [time, setTime] = useState('')
@@ -39,7 +50,10 @@ export default function Header({ showBack = true, showHome = false, showCall = f
 
   const handleBack = () => {
     if (onBack) { onBack(); return }
-    if (backTo) navigate(backTo)
+    if (backTo) { navigate(backTo); return }
+    const stepIdx = STEP_ROUTES.indexOf(location.pathname)
+    if (stepIdx > 0) navigate(STEP_ROUTES[stepIdx - 1], { state: { fromFlow: true } })
+    else if (stepIdx === 0) navigate('/state')
     else navigate(-1)
   }
 

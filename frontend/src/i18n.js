@@ -20,7 +20,7 @@ const translations = {
     chilboMeta: '칠보공예; chilbogongye',
     priceMeta: '가격, 과정 등',
 
-    call: '호출',
+    call: '도움',
 
     chooseYourDesign: '디자인을 선택해주세요',
     koreanHat: '한국 모자\n(갓)',
@@ -73,8 +73,10 @@ const translations = {
     stepProcessLog: '작업 기록',
     stepChilboVideo: '칠보 영상',
     stepGallery: '갤러리 탐색',
+    galleryFlowTitle: '작품들을 보고, 영감을 얻어보세요',
     chilboVideoPlaceholder: '영상 파일을 /public/chilbo.mp4 경로에 넣어주세요',
     stepHandcrafting: '공예',
+    craftingFlowTitle: '가이드에 따라 작품을 만들어보세요',
     stepSelectPackage: '패키지 선택',
     stepCompletion: '완성',
 
@@ -208,7 +210,7 @@ const translations = {
     chilboMeta: '칠보공예; chilbogongye',
     priceMeta: 'Price, Process, etc',
 
-    call: 'Call',
+    call: 'Help',
 
     chooseYourDesign: 'Choose your design',
     koreanHat: 'Korean hat\n(Gat)',
@@ -261,8 +263,10 @@ const translations = {
     stepProcessLog: 'Process Log',
     stepChilboVideo: 'Chilbo Video',
     stepGallery: 'Gallery',
+    galleryFlowTitle: 'Get Inspired, Then Do It',
     chilboVideoPlaceholder: 'Place your video file at /public/chilbo.mp4',
     stepHandcrafting: 'Crafting',
+    craftingFlowTitle: 'Follow the Guide, Create Your Piece',
     stepSelectPackage: 'Select Package',
     stepCompletion: 'Completion',
 

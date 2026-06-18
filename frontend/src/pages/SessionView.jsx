@@ -84,7 +84,9 @@ export default function SessionView() {
     <div style={v.page}>
       <div ref={captureRef} style={v.captureWrapper}>
         <div style={v.header}>
-          {fromApp && <button style={v.backBtn} onClick={() => navigate(-1)}>‹ {t.back}</button>}
+          <div style={v.headerLeft}>
+            {fromApp && <button style={v.backBtn} onClick={() => navigate(-1)}>‹ {t.back}</button>}
+          </div>
           <div style={v.headerCenter}>
             <img src={logo} alt="나녕" style={v.logo} />
           </div>
@@ -138,22 +140,24 @@ const v = {
   header: {
     display: 'flex',
     alignItems: 'center',
-    gap: 12,
     padding: '20px 28px',
     borderBottom: '1px solid rgba(0,0,0,0.07)',
-    background: 'rgba(255,255,255,0.8)',
-    backdropFilter: 'blur(8px)',
-    position: 'relative',
+    background: '#fff',
     zIndex: 10,
   },
+  headerLeft: {
+    flex: 1,
+    display: 'flex',
+    alignItems: 'center',
+  },
   headerCenter: {
-    position: 'absolute',
-    left: '50%',
-    transform: 'translateX(-50%)',
-    pointerEvents: 'none',
+    flex: 1,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   headerRight: {
-    marginLeft: 'auto',
+    flex: 1,
     textAlign: 'right',
   },
   backBtn: {

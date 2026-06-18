@@ -1,1 +1,8 @@
 /* App-level styles */
+
+.step-btn:active {
+  background: rgba(232, 146, 78, 0.12) !important;
+}
+.step-btn:focus {
+  outline: none;
+}
